@@ -1,3 +1,5 @@
+azure:
+  free_disk_space: true
 conda_build_tool: rattler-build
 github:
   branch_name: main
