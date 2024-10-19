@@ -81,10 +81,8 @@ requirements:
     - pytorch
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
-    - ${{ "kaldi * cuda*" if cuda == "true" }}
-    - ${{ "kaldi * cpu*" if cuda == "false" }}
-
     - bzip2
+    - kaldi
     - pybind11
     # - sox
     # - ffmpeg
@@ -111,8 +109,7 @@ requirements:
   run:
     - python
     - numpy
-    - ${{ "kaldi * cuda*" if cuda == "true" }}
-    - ${{ "kaldi * cpu*" if cuda == "false" }}
+    - kaldi
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
 
@@ -154,6 +151,8 @@ tests:
         - requests
         - hypothesis
         - inflect
+        # gpu version of kaldi tries to load libcuda, which we don't have
+        - kaldi * cpu*
         - kaldi_io
         - parameterized
         - pysoundfile
