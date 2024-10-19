@@ -111,34 +111,6 @@ Current build status
                 </a>
               </td>
             </tr><tr>
-              <td>linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.10.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/torchaudio-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.10.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.11.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/torchaudio-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.11.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.12.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/torchaudio-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.12.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
-              <td>linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.9.____cpython</td>
-              <td>
-                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/torchaudio-feedstock?branchName=main&jobName=linux&configuration=linux%20linux_aarch64_c_compiler_version11c_stdlib_version2.17cuda_compilernvcccuda_compiler_version11.8cxx_compiler_version11python3.9.____cpython" alt="variant">
-                </a>
-              </td>
-            </tr><tr>
               <td>linux_aarch64_c_compiler_version12c_stdlib_version2.17cuda_compilerNonecuda_compiler_versionNonecxx_compiler_version12python3.10.____cpython</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
