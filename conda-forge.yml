@@ -1,5 +1,8 @@
 azure:
   free_disk_space: true
+build_platform:
+  linux_aarch64: linux_64
+  osx_arm64: osx_64
 conda_build_tool: rattler-build
 github:
   branch_name: main
@@ -7,3 +10,4 @@ github:
 conda_build:
   error_overlinking: true
 conda_forge_output_validation: true
+test: native

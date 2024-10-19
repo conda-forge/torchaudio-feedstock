@@ -26,6 +26,7 @@ build:
   number: ${{ build_number }}
   skip:
     - win
+    - match(cuda_compiler_version, "11.8") and aarch64
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
@@ -80,7 +81,6 @@ requirements:
     - pytorch
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
-
     - bzip2
     - kaldi
     - pybind11
@@ -151,6 +151,8 @@ tests:
         - requests
         - hypothesis
         - inflect
+        # gpu version of kaldi tries to load libcuda, which we don't have
+        - kaldi * cpu*
         - kaldi_io
         - parameterized
         - pysoundfile
