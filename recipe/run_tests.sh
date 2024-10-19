@@ -71,5 +71,8 @@ tests_to_skip="test_pitch_shift_resample_kernel or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_1_wav2vec2_large or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
 
+# These tests need libcuda.so.1 which is not available due to licensing issues
+tests_to_skip="TestKaldi or ${tests_to_skip}"
+
 
 pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
