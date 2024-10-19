@@ -26,6 +26,7 @@ build:
   number: ${{ build_number }}
   skip:
     - win
+    - match(cuda_version, "11.8") and aarch64
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
@@ -80,9 +81,10 @@ requirements:
     - pytorch
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "kaldi * cuda*" if cuda == "true" }}
+    - ${{ "kaldi * cpu*" if cuda == "false" }}
 
     - bzip2
-    - kaldi
     - pybind11
     # - sox
     # - ffmpeg
@@ -109,7 +111,8 @@ requirements:
   run:
     - python
     - numpy
-    - kaldi
+    - ${{ "kaldi * cuda*" if cuda == "true" }}
+    - ${{ "kaldi * cpu*" if cuda == "false" }}
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
 
