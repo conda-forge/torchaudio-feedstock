@@ -1,0 +1,21 @@
+From 9fc1da385a19aaeda50b80d6a0023832f885a494 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Sat, 5 Oct 2024 20:52:42 +1000
+Subject: [PATCH 4/5] Add missing @skipIfNoFFmpeg for TestFileObject
+
+---
+ test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py b/test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py
+index 58a08563..bf93a752 100644
+--- a/test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py
++++ b/test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py
+@@ -404,6 +404,7 @@ class Unseekable:
+ 
+ 
+ @skipIfNoExec("sox")
++@skipIfNoFFmpeg
+ class TestFileObject(FileObjTestBase, PytorchTestCase):
+     _info = partial(get_info_func(), backend="ffmpeg")
+ 

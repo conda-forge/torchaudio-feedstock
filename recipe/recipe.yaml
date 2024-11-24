@@ -3,7 +3,7 @@
 context:
   name: torchaudio
   version: "2.4.1"
-  build_number: 1
+  build_number: 2
   cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA", default="None") }}
   cuda: ${{ "true" if cuda_version != "None" else "false" }}
   cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
@@ -20,7 +20,8 @@ source:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
       - patches/0003-Apply-CMAKE_ARGS-if-set.patch
-      - patches/0004-add-missing-ffmpeg-skip.patch
+      - patches/0004-Add-missing-skipIfNoFFmpeg-for-TestFileObject.patch
+      - patches/0005-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
 
 build:
   number: ${{ build_number }}
