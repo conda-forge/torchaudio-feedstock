@@ -1,7 +1,7 @@
 From c7ced84f1175294d75f55ae84a761f9d29720378 Mon Sep 17 00:00:00 2001
 From: Tobias Fischer <info@tobiasfischer.info>
 Date: Thu, 10 Oct 2024 09:38:57 +1000
-Subject: [PATCH 3/4] Apply CMAKE_ARGS if set
+Subject: [PATCH 3/5] Apply CMAKE_ARGS if set
 
 ---
  tools/setup_helpers/extension.py | 4 ++++

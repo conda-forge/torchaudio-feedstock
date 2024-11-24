@@ -1,7 +1,7 @@
 From 9fc1da385a19aaeda50b80d6a0023832f885a494 Mon Sep 17 00:00:00 2001
 From: Tobias Fischer <info@tobiasfischer.info>
 Date: Sat, 5 Oct 2024 20:52:42 +1000
-Subject: [PATCH 4/4] Add missing @skipIfNoFFmpeg for TestFileObject
+Subject: [PATCH 4/5] Add missing @skipIfNoFFmpeg for TestFileObject
 
 ---
  test/torchaudio_unittest/backend/dispatcher/ffmpeg/info_test.py | 1 +

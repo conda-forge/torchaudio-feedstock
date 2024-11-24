@@ -1,7 +1,7 @@
 From a1ee9df1cfa2d47eff3d74da2f588e3a4befc6eb Mon Sep 17 00:00:00 2001
 From: Tobias Fischer <info@tobiasfischer.info>
 Date: Thu, 10 Oct 2024 07:48:28 +1000
-Subject: [PATCH 2/4] use conda cuda
+Subject: [PATCH 2/5] use conda cuda
 
 ---
  tools/setup_helpers/extension.py | 4 ----
