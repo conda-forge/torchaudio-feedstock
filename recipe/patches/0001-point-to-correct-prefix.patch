@@ -1,3 +1,12 @@
+From 8aa5c7343a493513cb95e09d10bab17849787aaf Mon Sep 17 00:00:00 2001
+From: Hadrien Mary <hadrien.mary@gmail.com>
+Date: Fri, 27 Sep 2024 23:15:12 -0400
+Subject: [PATCH 1/4] point to correct prefix
+
+---
+ tools/setup_helpers/extension.py | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
 diff --git a/tools/setup_helpers/extension.py b/tools/setup_helpers/extension.py
 index 2415bbae..f724c4b8 100644
 --- a/tools/setup_helpers/extension.py

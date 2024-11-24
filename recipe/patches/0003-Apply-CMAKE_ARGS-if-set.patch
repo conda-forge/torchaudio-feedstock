@@ -1,8 +1,17 @@
+From c7ced84f1175294d75f55ae84a761f9d29720378 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Thu, 10 Oct 2024 09:38:57 +1000
+Subject: [PATCH 3/4] Apply CMAKE_ARGS if set
+
+---
+ tools/setup_helpers/extension.py | 4 ++++
+ 1 file changed, 4 insertions(+)
+
 diff --git a/tools/setup_helpers/extension.py b/tools/setup_helpers/extension.py
-index 2415bbaedb..2b6243a790 100644
+index 05c47664..8fa239bc 100644
 --- a/tools/setup_helpers/extension.py
 +++ b/tools/setup_helpers/extension.py
-@@ -3,6 +3,7 @@
+@@ -3,6 +3,7 @@ import os
  import platform
  import subprocess
  from pathlib import Path
@@ -10,7 +19,7 @@ index 2415bbaedb..2b6243a790 100644
  
  import torch
  from setuptools import Extension
-@@ -141,6 +142,9 @@ def build_extension(self, ext):
+@@ -142,6 +143,9 @@ class CMakeBuild(build_ext):
              f"-DUSE_OPENMP:BOOL={'ON' if _USE_OPENMP else 'OFF'}",
              f"-DUSE_FFMPEG:BOOL={'ON' if _USE_FFMPEG else 'OFF'}",
          ]
