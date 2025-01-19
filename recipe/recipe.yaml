@@ -49,7 +49,7 @@ requirements:
 
         - if: match(cuda_version, ">=12")
           then:
-            - cuda-driver-dev
+            - cuda-driver-dev   # [linux]
             - cuda-cudart-dev
             - cuda-nvrtc-dev
             - cuda-nvtx-dev
@@ -95,7 +95,7 @@ requirements:
 
     - if: match(cuda_version, ">=12")
       then:
-        - cuda-driver-dev
+        - cuda-driver-dev   # [linux]
         - cuda-cudart-dev
         - cuda-nvrtc-dev
         - cuda-nvtx-dev
