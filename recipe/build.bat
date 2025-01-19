@@ -40,4 +40,6 @@ set CMAKE_C_COMPILER=%CC%
 set CMAKE_CXX_COMPILER=%CXX%
 set CMAKE_GENERATOR=Ninja
 
+set CMAKE_Torch_ROOT=%SP_DIR%\torch
+
 python -m pip install . -vv
