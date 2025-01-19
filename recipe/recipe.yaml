@@ -3,7 +3,7 @@
 context:
   name: torchaudio
   version: "2.5.1"
-  build_number: 0
+  build_number: 1
   cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA", default="None") }}
   cuda: ${{ "true" if cuda_version != "None" else "false" }}
   cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
@@ -26,8 +26,8 @@ source:
 build:
   number: ${{ build_number }}
   skip:
-    - win
-    - match(cuda_compiler_version, "11.8") and aarch64
+    - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
+    - not win  # for debugging
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
@@ -50,7 +50,8 @@ requirements:
 
         - if: match(cuda_version, ">=12")
           then:
-            - cuda-driver-dev
+            - if: linux
+              then: cuda-driver-dev
             - cuda-cudart-dev
             - cuda-nvrtc-dev
             - cuda-nvtx-dev
@@ -96,7 +97,8 @@ requirements:
 
     - if: match(cuda_version, ">=12")
       then:
-        - cuda-driver-dev
+        - if: linux
+          then: cuda-driver-dev
         - cuda-cudart-dev
         - cuda-nvrtc-dev
         - cuda-nvtx-dev
