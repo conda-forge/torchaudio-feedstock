@@ -162,6 +162,9 @@ tests:
         # - sox
         - pytorch-lightning
         - sentencepiece
+        - if: cuda_compiler_version != "None"
+          then:
+            - cuda-version ==${{ cuda_compiler_version }}
     files:
       source:
         - test/
