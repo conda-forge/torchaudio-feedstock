@@ -4,9 +4,8 @@ context:
   name: torchaudio
   version: "2.5.1"
   build_number: 1
-  cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA", default="None") }}
-  cuda: ${{ "true" if cuda_version != "None" else "false" }}
-  cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
+  cuda: ${{ "true" if cuda_compiler_version != "None" else "false" }}
+  cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
   string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
 
 package:
@@ -38,7 +37,7 @@ build:
   script:
     file: build
     env:
-      cuda_compiler_version: ${{ cuda_version | default('None') }}
+      cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
 
 requirements:
   build:
@@ -48,7 +47,7 @@ requirements:
         - cross-python_${{ target_platform }}
         - pytorch
 
-        - if: match(cuda_version, ">=12")
+        - if: match(cuda_compiler_version, ">=12")
           then:
             - cuda-driver-dev
             - cuda-cudart-dev
@@ -70,10 +69,10 @@ requirements:
     - ccache
     - git
 
-    - if: cuda == "true"
+    - if: cuda_compiler_version != "None"
       then:
         - ${{ compiler('cuda') }}
-        - cuda-version ==${{ cuda_version }}
+        - cuda-version ==${{ cuda_compiler_version }}
 
   host:
     - python
@@ -90,11 +89,11 @@ requirements:
     - xz
     - zlib
 
-    - if: cuda == "true"
+    - if: cuda_compiler_version != "None"
       then:
-        - cuda-version ==${{ cuda_version }}
+        - cuda-version ==${{ cuda_compiler_version }}
 
-    - if: match(cuda_version, ">=12")
+    - if: match(cuda_compiler_version, ">=12")
       then:
         - cuda-driver-dev
         - cuda-cudart-dev
@@ -116,7 +115,7 @@ requirements:
 
   ignore_run_exports:
     from_package:
-      - if: match(cuda_version, ">=12")
+      - if: match(cuda_compiler_version, ">=12")
         then:
           - cuda-nvrtc-dev
           - cuda-nvtx-dev
