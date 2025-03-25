@@ -91,7 +91,7 @@ requirements:
     - pybind11
     # - sox
     # - ffmpeg
-    - xz
+    - liblzma-devel
     - zlib
 
     - if: cuda_compiler_version != "None"
