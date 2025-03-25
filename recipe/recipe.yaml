@@ -26,7 +26,8 @@ build:
   number: ${{ build_number }}
   skip:
     - win
-    - cuda_compiler_version == "11.8" and aarch64
+    # CUDA 11.8 not supported by pytorch anymore
+    - cuda_compiler_version != "None" and match(cuda_compiler_version, "<12.0")
     # llvmlite fix only available for numba version that doesn't support py39 anymore
     - match(python, "<3.10")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
