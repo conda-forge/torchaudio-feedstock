@@ -3,7 +3,7 @@
 context:
   name: torchaudio
   version: "2.5.1"
-  build_number: 1
+  build_number: 2
   cuda: ${{ "true" if cuda_compiler_version != "None" else "false" }}
   cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
   string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
@@ -90,7 +90,7 @@ requirements:
     - pybind11
     # - sox
     # - ffmpeg
-    - xz
+    - liblzma-devel
     - zlib
 
     - if: cuda_compiler_version != "None"
