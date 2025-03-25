@@ -27,6 +27,8 @@ build:
   skip:
     - win
     - cuda_compiler_version == "11.8" and aarch64
+    # llvmlite fix only available for numba version that doesn't support py39 anymore
+    - match(python, "<3.10")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
@@ -112,6 +114,9 @@ requirements:
     - kaldi
     - ${{ "pytorch * cuda*" if cuda == "true" }}
     - ${{ "pytorch * cpu*" if cuda == "false" }}
+  run_constraints:
+    # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
+    - llvmlite >=0.44
 
   ignore_run_exports:
     from_package:
