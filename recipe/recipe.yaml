@@ -40,6 +40,8 @@ build:
     file: build
     env:
       cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
+      # required by the setup.py script to find the right version
+      BUILD_VERSION: ${{ version }}
 
 requirements:
   build:
@@ -145,6 +147,11 @@ tests:
         - torchaudio.sox_effects
         - torchaudio.transforms
       pip_check: true
+
+  - package_contents:
+      site_packages:
+        # ensure that the package metadata did not mangle in the git hash
+        - torchaudio-${{ version }}.dist-info/METADATA
 
   - requirements:
       run:
