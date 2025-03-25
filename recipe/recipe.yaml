@@ -2,8 +2,8 @@
 
 context:
   name: torchaudio
-  version: "2.5.1"
-  build_number: 1
+  version: "2.6.0"
+  build_number: 0
   cuda: ${{ "true" if cuda_compiler_version != "None" else "false" }}
   cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
   string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
@@ -14,7 +14,7 @@ package:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 200fbb1234c104a3662b444c0bec2acf4049c4b2113a73c0dc5f4e672cc2a4cc
+    sha256: 3335d8fcf58c26acf3c628d751103b59226e01c91847ce56efb2a4e7ae8351ef
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
@@ -26,7 +26,8 @@ build:
   number: ${{ build_number }}
   skip:
     - win
-    - cuda_compiler_version == "11.8" and aarch64
+    # CUDA 11.8 not supported by pytorch anymore
+    - cuda_compiler_version != "None" and match(cuda_compiler_version, "<12.0")
     # llvmlite fix only available for numba version that doesn't support py39 anymore
     - match(python, "<3.10")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
@@ -90,7 +91,7 @@ requirements:
     - pybind11
     # - sox
     # - ffmpeg
-    - xz
+    - liblzma-devel
     - zlib
 
     - if: cuda_compiler_version != "None"
