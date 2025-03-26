@@ -3,10 +3,9 @@
 context:
   name: torchaudio
   version: "2.6.0"
-  build_number: 0
-  cuda: ${{ "true" if cuda_compiler_version != "None" else "false" }}
-  cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
-  string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
+  build_number: 1
+  cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
+  string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
 package:
   name: ${{ name|lower }}
@@ -34,9 +33,9 @@ build:
   variant:
     use_keys:
       # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda == "true" }}
+      - ${{ "cuda" if cuda_compiler_version != "None" }}
     # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 1 if cuda == "true" else 0 }}
+    down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
   script:
     file: build
     env:
@@ -84,8 +83,8 @@ requirements:
     - pip
     - setuptools
     - pytorch
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
     - bzip2
     - kaldi
     - pybind11
@@ -115,8 +114,8 @@ requirements:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
   run_constraints:
     # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
     - llvmlite >=0.44
