@@ -2,8 +2,8 @@
 
 context:
   name: torchaudio
-  version: "2.7.0"
-  build_number: 1
+  version: "2.7.1"
+  build_number: 0
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
@@ -13,7 +13,7 @@ package:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 31de856d3daa5c1db983eb5b964ed33d54be6e5038d6504181fe51e2d6cc6448
+    sha256: fc8159476d1b3b5978d5e66746fc34be168170800ff4c5e356433d8c9c57cbea
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
