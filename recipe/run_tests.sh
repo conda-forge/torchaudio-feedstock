@@ -28,9 +28,9 @@ export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_SOX="true"
 
 ## OVERVIEW OF SKIPPED TESTS
 
-# Output 0 of UnbindBackward0 is a view and is being modified inplace. 
-# This view is the output of a function that returns multiple views. 
-# Such functions do not allow the output views to be modified inplace. 
+# Output 0 of UnbindBackward0 is a view and is being modified inplace.
+# This view is the output of a function that returns multiple views.
+# Such functions do not allow the output views to be modified inplace.
 # You should replace the inplace operation by an out-of-place one.
 tests_to_skip="TestAutogradLfilterCPU"
 tests_to_skip="test_deemphasis or ${tests_to_skip}"
@@ -70,6 +70,13 @@ tests_to_skip="test_PitchShift or ${tests_to_skip}"
 tests_to_skip="test_pitch_shift_resample_kernel or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_1_wav2vec2_large or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+
+# AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)
+tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
+
+# ValueError: bad delimiter value (in Python 3.13)
+tests_to_skip="test_cmuarctic_path or ${tests_to_skip}"
+tests_to_skip="test_cmuarctic_str or ${tests_to_skip}"
 
 
 pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
