@@ -60,20 +60,21 @@ rem      them with ‘/’ **after** CMAKE_ARGS is fully assembled.
 rem ---------------------------------------------------------------------------
 
 if exist "%Torch_ROOT%\lib\torch_python.lib" (
+    rem Append — *do NOT overwrite* — otherwise the value becomes the literal
+    rem string "PREFIX", breaking the Ninja build.
     set "TORCH_PYTHON_LIBRARY=%Torch_ROOT%\lib\torch_python.lib"
     set "CMAKE_ARGS=%CMAKE_ARGS% -DTORCH_PYTHON_LIBRARY=%TORCH_PYTHON_LIBRARY%"
 )
-rem ────────────────────────────────────────────────────────────────
-rem If the caller passed an *empty* "-DCUDAToolkit_ROOT=" flag
-rem (common in conda-forge recipe tooling), replace it with the real
-rem path – CMake treats an empty value as a hard error.
-rem ────────────────────────────────────────────────────────────────
+
+rem -----------------------------------------------------------------
+rem Replace a *blank* "-DCUDAToolkit_ROOT=" (if present) with %PREFIX%.
+rem -----------------------------------------------------------------
 set "CMAKE_ARGS=%CMAKE_ARGS: -DCUDAToolkit_ROOT== -DCUDAToolkit_ROOT=%PREFIX%"
+if defined CUDAToolkit_ROOT (
+    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%CUDAToolkit_ROOT%"
+)
 
-rem And make sure our own value wins:
-set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%CUDAToolkit_ROOT%"
-
-rem Keep back‑slashes from being stripped by shlex:
+rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=%CMAKE_ARGS:\=/%"
 
 python -m pip install . -vv
