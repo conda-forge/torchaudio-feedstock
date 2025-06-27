@@ -40,18 +40,21 @@ if not "%cuda_compiler_version%" == "None" (
     rem bogus path.                                               (added for fix)
     rem --------------------------------------------------------------------------
 
-    rem Conda‑forge's Windows toolchain ships nvcc.bat since CUDA 12.2
     set "CUDACXX_CANDIDATE_1=!PREFIX!\bin\nvcc.exe"
     set "CUDACXX_CANDIDATE_2=!PREFIX!\bin\nvcc.bat"
     set "CUDACXX_CANDIDATE_3=!PREFIX!\Library\bin\nvcc.exe"
     set "CUDACXX_CANDIDATE_4=!PREFIX!\Library\bin\nvcc.bat"
 
+    rem Assume the CUDA CTC decoder will be built; may be disabled below
+    set BUILD_CUDA_CTC_DECODER=1
+
+    rem Search all candidates – the first match wins, no labels required
     for %%f in ("!CUDACXX_CANDIDATE_1!" "!CUDACXX_CANDIDATE_2!" ^
                 "!CUDACXX_CANDIDATE_3!" "!CUDACXX_CANDIDATE_4!") do (
-        if defined CUDACXX goto :found_nvcc
-        if exist "%%~f" set "CUDACXX=%%~f"
+        if not defined CUDACXX (
+            if exist "%%~f" set "CUDACXX=%%~f"
+        )
     )
-:found_nvcc
 
     rem Graceful degradation – skip the CUDA CTC decoder when nvcc is absent
     if not defined CUDACXX (
@@ -64,7 +67,7 @@ if not "%cuda_compiler_version%" == "None" (
   )
 
   set USE_CUDA=1
-  set BUILD_CUDA_CTC_DECODER=1
+  rem Keep BUILD_CUDA_CTC_DECODER as computed above (0 or 1)
 ) else (
   set USE_CUDA=0
   set BUILD_CUDA_CTC_DECODER=0
