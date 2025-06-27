@@ -4,13 +4,10 @@ context:
   name: torchaudio
   version: "2.5.1"
   build_number: 1
-  # Honour the CUDA version coming from the variant configuration while still
-  # allowing an explicit developer override through CONDA_OVERRIDE_CUDA.
-  cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA",
-                            default=cuda_compiler_version | default("None")) }}
-  cuda: ${{ "true" if cuda_version != "None" else "false" }}
+  # Use cuda_compiler_version directly from variant; default to "None" for CPU builds
+  cuda_version: ${{ cuda_compiler_version | default("None") }}
   cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
-  string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
+  string_prefix: ${{ cuda_build_string if cuda_version != "None" else "cpu_" }}
 
 package:
   name: ${{ name|lower }}
@@ -30,14 +27,14 @@ build:
   number: ${{ build_number }}
   skip:
     - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
-    - not win  # for debugging
+    # - not win  # Remove this debug skip
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
       # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda == "true" }}
+      - ${{ "cuda_compiler_version" if cuda_version != "None" }}
     # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 1 if cuda == "true" else 0 }}
+    down_prioritize_variant: ${{ 1 if cuda_version != "None" else 0 }}
   script:
     file: build
     env:
@@ -51,7 +48,7 @@ requirements:
         - cross-python_${{ target_platform }}
         - pytorch
 
-        - if: match(cuda_version, ">=12")
+        - if: match(cuda_compiler_version, ">=12")
           then:
             - if: linux
               then: cuda-driver-dev
@@ -75,26 +72,25 @@ requirements:
     - ccache
     - git
 
-    - if: cuda == "true"
+    # CUDA build dependencies - use cuda_compiler_version directly
+    - if: cuda_compiler_version is defined and cuda_compiler_version != "None"
       then:
-        # nvcc is mandatory at build‑time; platform‑specific names are needed.
         - ${{ compiler('cuda') }}
-
-        # nvcc package name differs on Windows.
-        - if: win
-          then: cuda-nvcc_win-64 ${{ cuda_version }}.*
-          else: cuda-nvcc        ${{ cuda_version }}.*
-        # Stay on the toolkit minor we are actually building for so that
-        # `cuda‑nvcc` is available on Windows.
-        - cuda-version ${{ cuda_version }}.*
+        - cuda-version ${{ cuda_compiler_version }}.*
+    
+    # Platform-specific nvcc package
+    - if: (cuda_compiler_version is defined and cuda_compiler_version != "None") and win
+      then: cuda-nvcc_win-64 ${{ cuda_compiler_version }}.*
+    - if: (cuda_compiler_version is defined and cuda_compiler_version != "None") and not win
+      then: cuda-nvcc ${{ cuda_compiler_version }}.*
 
   host:
     - python
     - pip
     - setuptools
     - pytorch
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda_version != "None" }}
+    - ${{ "pytorch * cpu*" if cuda_version == "None" }}
     - bzip2
     - kaldi
     - pybind11
@@ -103,16 +99,17 @@ requirements:
     - xz
     - zlib
 
-    - if: cuda == "true"
+    # CUDA host dependencies
+    - if: cuda_compiler_version is defined and cuda_compiler_version != "None"
       then:
-        # Host env executes `python -m pip install .`, so nvcc must also be
-        # present here for CMake/`setuptools` discovery.
-        - cuda-version ${{ cuda_version }}.*
-        - if: win
-          then: cuda-nvcc_win-64 ${{ cuda_version }}.*
-          else: cuda-nvcc        ${{ cuda_version }}.*
+        - cuda-version ${{ cuda_compiler_version }}.*
+    
+    - if: (cuda_compiler_version is defined and cuda_compiler_version != "None") and win
+      then: cuda-nvcc_win-64 ${{ cuda_compiler_version }}.*
+    - if: (cuda_compiler_version is defined and cuda_compiler_version != "None") and not win
+      then: cuda-nvcc ${{ cuda_compiler_version }}.*
 
-    - if: match(cuda_version, ">=12")
+    - if: cuda_compiler_version is defined and match(cuda_compiler_version, ">=12")
       then:
         - if: linux
           then: cuda-driver-dev
@@ -130,12 +127,12 @@ requirements:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda_version != "None" }}
+    - ${{ "pytorch * cpu*" if cuda_version == "None" }}
 
   ignore_run_exports:
     from_package:
-      - if: match(cuda_version, ">=12")
+      - if: cuda_compiler_version is defined and match(cuda_compiler_version, ">=12")
         then:
           - cuda-nvrtc-dev
           - cuda-nvtx-dev

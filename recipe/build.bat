@@ -9,6 +9,7 @@ echo   BUILD SCRIPT           : %~f0
 echo   PREFIX                 : %PREFIX%
 echo   BUILD_PREFIX           : %BUILD_PREFIX%
 echo   cuda_compiler_version  : %cuda_compiler_version%
+echo   CONDA_BUILD_VARIANT    : %CONDA_BUILD_VARIANT%
 echo   PATH                   : %PATH%
 echo ================================================================================
 
@@ -128,6 +129,11 @@ echo   [build.bat diagnostics]
 echo   PREFIX      = !PREFIX!
 echo   BUILD_PREFIX= !BUILD_PREFIX!
 echo   CUDACXX     = !CUDACXX!
+echo   USE_CUDA    = !USE_CUDA!
+echo   BUILD_CUDA_CTC_DECODER = !BUILD_CUDA_CTC_DECODER!
+echo   CUDAToolkit_ROOT = !CUDAToolkit_ROOT!
+echo   CUDA_HOME   = !CUDA_HOME!
+echo   TORCH_CUDA_ARCH_LIST = !TORCH_CUDA_ARCH_LIST!
 if exist "!CUDACXX!" (
     echo   nvcc.exe FOUND at !CUDACXX!
 ) else (
