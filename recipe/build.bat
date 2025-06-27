@@ -12,10 +12,13 @@ if not "%cuda_compiler_version%" == "None" (
     rem   * nvcc.exe lives in  %PREFIX%\Library\bin
     rem   * CMake ≥3.26 honours        CUDAToolkit_ROOT  or  CUDACXX
     rem ────────────────────────────────────────────────────────────────
-    set "CUDA_TOOLKIT_ROOT_DIR=%PREFIX%"
-    set "CUDA_HOME=%PREFIX%"
-    set "CUDAToolkit_ROOT=%PREFIX%"
-    set "CUDACXX=%PREFIX%\Library\bin\nvcc.exe"
+    rem Use delayed‑expansion so %PREFIX% is resolved *now*, not left
+    rem literally in the value.  A literal "%PREFIX%" breaks CMake's
+    rem CUDA compiler detection on Windows.
+    set "CUDA_TOOLKIT_ROOT_DIR=!PREFIX!"
+    set "CUDA_HOME=!PREFIX!"
+    set "CUDAToolkit_ROOT=!PREFIX!"
+    set "CUDACXX=!PREFIX!\Library\bin\nvcc.exe"
   ) else (
     echo "unsupported cuda version. edit build.bat"
     exit /b 1
@@ -67,7 +70,7 @@ if exist "%Torch_ROOT%\lib\torch_python.lib" (
 
 REM Tell CMake where CUDA lives, **without** wiping the rest of the flags
 if defined CUDAToolkit_ROOT (
-    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%PREFIX%"
+    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=!PREFIX!"
 )
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
