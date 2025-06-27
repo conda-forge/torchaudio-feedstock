@@ -35,22 +35,22 @@ if not "%cuda_compiler_version%" == "None" (
     set "CUDAToolkit_ROOT=!PREFIX!"
     set "CUDACXX=!PREFIX!\Library\bin\nvcc.exe"
 
-echo ========= CUDA DEBUG =========
-echo cuda_compiler_version   = %cuda_compiler_version%
-echo CUDA_TOOLKIT_ROOT_DIR   = %CUDA_TOOLKIT_ROOT_DIR%
-echo CUDA_HOME               = %CUDA_HOME%
-echo CUDAToolkit_ROOT        = %CUDAToolkit_ROOT%
-echo CUDACXX                 = %CUDACXX%
-echo USE_CUDA                = %USE_CUDA%
-echo TORCH_CUDA_ARCH_LIST    = %TORCH_CUDA_ARCH_LIST%
-where nvcc || echo "where nvcc -> NOT FOUND"
-if exist "%CUDACXX%" (
-  echo nvcc FOUND exactly where we expect
-) else (
-  echo nvcc **MISSING** at %CUDACXX%
-  dir "%PREFIX%\Library\bin"
-)
-echo ==============================
+    echo ========= CUDA DEBUG =========
+    echo cuda_compiler_version   = !cuda_compiler_version!
+    echo CUDA_TOOLKIT_ROOT_DIR   = !CUDA_TOOLKIT_ROOT_DIR!
+    echo CUDA_HOME               = !CUDA_HOME!
+    echo CUDAToolkit_ROOT        = !CUDAToolkit_ROOT!
+    echo CUDACXX                 = !CUDACXX!
+    echo USE_CUDA                = !USE_CUDA!
+    echo TORCH_CUDA_ARCH_LIST    = !TORCH_CUDA_ARCH_LIST!
+    where nvcc || echo "where nvcc -> NOT FOUND"
+    if exist "!CUDACXX!" (
+      echo nvcc FOUND exactly where we expect
+    ) else (
+      echo nvcc **MISSING** at !CUDACXX!
+      dir "!PREFIX!\Library\bin"
+    )
+    echo ==============================
 
   ) else (
     echo "unsupported cuda version. edit build.bat"

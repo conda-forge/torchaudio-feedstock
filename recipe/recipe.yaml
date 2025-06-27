@@ -29,15 +29,9 @@ source:
 build:
   number: ${{ build_number }}
   skip:
-    - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
+    - cuda_compiler_version | version_compare("==11.8") and (aarch64 or win)
     - not win  # for debugging
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
-  variant:
-    use_keys:
-      # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda == "true" }}
-    # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 1 if cuda == "true" else 0 }}
   script:
     file: build
     env:
@@ -45,26 +39,20 @@ build:
 
 requirements:
   build:
-    - if: build_platform != target_platform
-      then:
-        - python
-        - cross-python_${{ target_platform }}
-        - pytorch
-
-        - if: match(cuda_version, ">=12")
-          then:
-            - if: linux
-              then: cuda-driver-dev
-            - cuda-cudart-dev
-            - cuda-nvrtc-dev
-            - cuda-nvtx-dev
-            - cuda-nvml-dev
-            - cuda-profiler-api
-            - libcublas-dev
-            - libcufft-dev
-            - libcurand-dev
-            - libcusolver-dev
-            - libcusparse-dev
+    - python                                  # [build_platform != target_platform]
+    - cross-python_${{ target_platform }}      # [build_platform != target_platform]
+    - pytorch                                 # [build_platform != target_platform]
+    - cuda-driver-dev                         # [linux and cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - cuda-cudart-dev                         # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - cuda-nvrtc-dev                          # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - cuda-nvtx-dev                           # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - cuda-nvml-dev                           # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - cuda-profiler-api                       # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - libcublas-dev                           # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - libcufft-dev                            # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - libcurand-dev                           # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - libcusolver-dev                         # [cuda_version | version_compare(">=12") and build_platform != target_platform]
+    - libcusparse-dev                         # [cuda_version | version_compare(">=12") and build_platform != target_platform]
 
     - ${{ compiler('cxx') }}
     - ${{ compiler('c') }}
@@ -74,21 +62,17 @@ requirements:
     - ccache
     - git
 
-    - if: cuda == "true"
-      then:
-        # nvcc is mandatory at build‑time; `compiler('cuda')` alone does not
-        # pull it in on win‑64 yet.
-        - ${{ compiler('cuda') }}      # keeps tool-chain activation
-        - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}
-        - cuda-version ==${{ cuda_version }}
+    # nvcc is mandatory at build‑time; `compiler('cuda')` alone does not
+    # pull it in on win‑64 yet.
+    - ${{ compiler('cuda') }}                                  # [cuda == "true"]
+    - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}      # [cuda == "true"]
+    - cuda-version ==${{ cuda_version }}                      # [cuda == "true"]
 
   host:
     - python
     - pip
     - setuptools
-    - pytorch
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda == "true" else "pytorch * cpu*" }}
     - bzip2
     - kaldi
     - pybind11
@@ -97,44 +81,36 @@ requirements:
     - xz
     - zlib
 
-    - if: cuda == "true"
-      then:
-        # nvcc package names differ by platform.
-        - cuda-version ==${{ cuda_version }}
-        - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}
+    # nvcc package names differ by platform.
+    - cuda-version ==${{ cuda_version }}                      # [cuda == "true"]
+    - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}      # [cuda == "true"]
 
-    - if: match(cuda_version, ">=12")
-      then:
-        - if: linux
-          then: cuda-driver-dev
-        - cuda-cudart-dev
-        - cuda-nvrtc-dev
-        - cuda-nvtx-dev
-        - cuda-nvml-dev
-        - cuda-profiler-api
-        - libcublas-dev
-        - libcufft-dev
-        - libcurand-dev
-        - libcusolver-dev
-        - libcusparse-dev
+    - cuda-driver-dev                         # [linux and cuda_version | version_compare(">=12")]
+    - cuda-cudart-dev                         # [cuda_version | version_compare(">=12")]
+    - cuda-nvrtc-dev                          # [cuda_version | version_compare(">=12")]
+    - cuda-nvtx-dev                           # [cuda_version | version_compare(">=12")]
+    - cuda-nvml-dev                           # [cuda_version | version_compare(">=12")]
+    - cuda-profiler-api                       # [cuda_version | version_compare(">=12")]
+    - libcublas-dev                           # [cuda_version | version_compare(">=12")]
+    - libcufft-dev                            # [cuda_version | version_compare(">=12")]
+    - libcurand-dev                           # [cuda_version | version_compare(">=12")]
+    - libcusolver-dev                         # [cuda_version | version_compare(">=12")]
+    - libcusparse-dev                         # [cuda_version | version_compare(">=12")]
   run:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda == "true" }}
-    - ${{ "pytorch * cpu*" if cuda == "false" }}
+    - ${{ "pytorch * cuda*" if cuda == "true" else "pytorch * cpu*" }}
 
   ignore_run_exports:
     from_package:
-      - if: match(cuda_version, ">=12")
-        then:
-          - cuda-nvrtc-dev
-          - cuda-nvtx-dev
-          - libcublas-dev
-          - libcufft-dev
-          - libcurand-dev
-          - libcusolver-dev
-          - libcusparse-dev
+      - cuda-nvrtc-dev      # [cuda_version | version_compare(">=12")]
+      - cuda-nvtx-dev       # [cuda_version | version_compare(">=12")]
+      - libcublas-dev       # [cuda_version | version_compare(">=12")]
+      - libcufft-dev        # [cuda_version | version_compare(">=12")]
+      - libcurand-dev       # [cuda_version | version_compare(">=12")]
+      - libcusolver-dev     # [cuda_version | version_compare(">=12")]
+      - libcusparse-dev     # [cuda_version | version_compare(">=12")]
 
 tests:
   - python:
