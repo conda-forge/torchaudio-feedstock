@@ -29,9 +29,15 @@ source:
 build:
   number: ${{ build_number }}
   skip:
-    - cuda_compiler_version | version_compare("==11.8") and (aarch64 or win)
+    - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
     - not win  # for debugging
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
+  variant:
+    use_keys:
+      # use cuda from the variant config, e.g. to build multiple CUDA variants
+      - ${{ "cuda" if cuda == "true" }}
+    # this will down-prioritize the cuda variant versus other variants of the package
+    down_prioritize_variant: ${{ 1 if cuda == "true" else 0 }}
   script:
     file: build
     env:
@@ -45,22 +51,20 @@ requirements:
         - cross-python_${{ target_platform }}
         - pytorch
 
-    - if: build_platform != target_platform and linux and cuda_version | version_compare(">=12")
-      then:
-        - cuda-driver-dev
-
-    - if: build_platform != target_platform and cuda_version | version_compare(">=12")
-      then:
-        - cuda-cudart-dev
-        - cuda-nvrtc-dev
-        - cuda-nvtx-dev
-        - cuda-nvml-dev
-        - cuda-profiler-api
-        - libcublas-dev
-        - libcufft-dev
-        - libcurand-dev
-        - libcusolver-dev
-        - libcusparse-dev
+        - if: match(cuda_version, ">=12")
+          then:
+            - if: linux
+              then: cuda-driver-dev
+            - cuda-cudart-dev
+            - cuda-nvrtc-dev
+            - cuda-nvtx-dev
+            - cuda-nvml-dev
+            - cuda-profiler-api
+            - libcublas-dev
+            - libcufft-dev
+            - libcurand-dev
+            - libcusolver-dev
+            - libcusparse-dev
 
     - ${{ compiler('cxx') }}
     - ${{ compiler('c') }}
@@ -72,17 +76,21 @@ requirements:
 
     - if: cuda == "true"
       then:
-        # nvcc is mandatory at build‑time; `compiler('cuda')` alone does not
-        # pull it in on win‑64 yet.
+        # nvcc is mandatory at build‑time; platform‑specific names are needed.
         - ${{ compiler('cuda') }}
-        - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}
+        - if: win
+          then: cuda-nvcc_win-64      # ships nvcc.exe on Windows
+        - if: linux
+          then: cuda-nvcc             # linux‑64 package
         - cuda-version ==${{ cuda_version }}
 
   host:
     - python
     - pip
     - setuptools
-    - ${{ "pytorch * cuda*" if cuda == "true" else "pytorch * cpu*" }}
+    - pytorch
+    - ${{ "pytorch * cuda*" if cuda == "true" }}
+    - ${{ "pytorch * cpu*" if cuda == "false" }}
     - bzip2
     - kaldi
     - pybind11
@@ -93,16 +101,18 @@ requirements:
 
     - if: cuda == "true"
       then:
-        # nvcc package names differ by platform.
+        # Host env executes `python -m pip install .`, so nvcc must also be
+        # present here for CMake/`setuptools` discovery.
         - cuda-version ==${{ cuda_version }}
-        - ${{ "cuda-nvcc_win-64" if win else "cuda-nvcc" }}
+        - if: win
+          then: cuda-nvcc_win-64
+        - if: linux
+          then: cuda-nvcc
 
-    - if: linux and cuda_version | version_compare(">=12")
+    - if: match(cuda_version, ">=12")
       then:
-        - cuda-driver-dev
-
-    - if: cuda_version | version_compare(">=12")
-      then:
+        - if: linux
+          then: cuda-driver-dev
         - cuda-cudart-dev
         - cuda-nvrtc-dev
         - cuda-nvtx-dev
@@ -117,11 +127,12 @@ requirements:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda == "true" else "pytorch * cpu*" }}
+    - ${{ "pytorch * cuda*" if cuda == "true" }}
+    - ${{ "pytorch * cpu*" if cuda == "false" }}
 
   ignore_run_exports:
     from_package:
-      - if: cuda_version | version_compare(">=12")
+      - if: match(cuda_version, ">=12")
         then:
           - cuda-nvrtc-dev
           - cuda-nvtx-dev

@@ -47,4 +47,17 @@ export CMAKE_C_COMPILER="$CC"
 export CMAKE_CXX_COMPILER="$CXX"
 export CMAKE_GENERATOR="Ninja"
 
-python -m pip install . -vv
+# -------------------------------------------------------------------------------
+#   [build.sh diagnostics]                                         (added debug)
+# -------------------------------------------------------------------------------
+echo "==============================================="
+echo "[build.sh diagnostics]"
+echo "PREFIX               = ${PREFIX}"
+echo "BUILD_PREFIX         = ${BUILD_PREFIX}"
+echo "CUDA_HOME            = ${CUDA_HOME}"
+echo "CUDA_TOOLKIT_ROOT_DIR= ${CUDA_TOOLKIT_ROOT_DIR}"
+echo "nvcc (if any)        = $(command -v nvcc || echo 'nvcc not on PATH')"
+echo "PATH                 = ${PATH}"
+echo "==============================================="
+
+python -m pip install . -v
