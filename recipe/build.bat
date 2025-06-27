@@ -1,6 +1,21 @@
 @echo On
 setlocal enabledelayedexpansion
 
+rem ════════════════════════════════════════════════════════════════════
+rem Global Azure/conda-build verbosity
+rem ════════════════════════════════════════════════════════════════════
+@echo ON
+set CONDA_BLD_DEBUG=3
+set CONDA_BLD_VERBOSE=3
+set MAMBA_NO_PROMPT=1
+
+rem ════════════════════════════════════════════════════════════════════
+rem Snapshot before we touch anything
+rem ════════════════════════════════════════════════════════════════════
+echo ========= RAW ENV (before) =========
+set
+echo ====================================
+
 if not "%cuda_compiler_version%" == "None" (
   rem Set the CUDA arch list from
   rem https://github.com/conda-forge/pytorch-cpu-feedstock/blob/main/recipe/build_pytorch.sh
@@ -19,6 +34,24 @@ if not "%cuda_compiler_version%" == "None" (
     set "CUDA_HOME=!PREFIX!"
     set "CUDAToolkit_ROOT=!PREFIX!"
     set "CUDACXX=!PREFIX!\Library\bin\nvcc.exe"
+
+echo ========= CUDA DEBUG =========
+echo cuda_compiler_version   = %cuda_compiler_version%
+echo CUDA_TOOLKIT_ROOT_DIR   = %CUDA_TOOLKIT_ROOT_DIR%
+echo CUDA_HOME               = %CUDA_HOME%
+echo CUDAToolkit_ROOT        = %CUDAToolkit_ROOT%
+echo CUDACXX                 = %CUDACXX%
+echo USE_CUDA                = %USE_CUDA%
+echo TORCH_CUDA_ARCH_LIST    = %TORCH_CUDA_ARCH_LIST%
+where nvcc || echo "where nvcc -> NOT FOUND"
+if exist "%CUDACXX%" (
+  echo nvcc FOUND exactly where we expect
+) else (
+  echo nvcc **MISSING** at %CUDACXX%
+  dir "%PREFIX%\Library\bin"
+)
+echo ==============================
+
   ) else (
     echo "unsupported cuda version. edit build.bat"
     exit /b 1
@@ -95,4 +128,15 @@ if exist "!CUDACXX!" (
 echo   CMAKE_ARGS  = !CMAKE_ARGS!
 echo ================================================================================
 
+rem ── Crank CMake/Ninja verbosity to 11 ───────────────────────────────
+set CMAKE_VERBOSE_MAKEFILE=ON
+set CMAKE_FIND_DEBUG_MODE=1
+set VERBOSE=1
+set Ninja_FLAGS=-v
+set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_VERBOSE_MAKEFILE=ON --debug-find"
+
 python -m pip install . -vv
+
+echo ========= RAW ENV (after) =========
+set
+echo ===================================
