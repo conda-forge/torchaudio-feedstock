@@ -26,9 +26,10 @@ if not "%cuda_compiler_version%" == "None" (
     rem Use delayed‑expansion so %PREFIX% is resolved *now*, not left
     rem literally in the value.  A literal "%PREFIX%" breaks CMake's
     rem CUDA compiler detection on Windows.
-    set "CUDA_TOOLKIT_ROOT_DIR=!PREFIX!"
-    set "CUDA_HOME=!PREFIX!"
-    set "CUDAToolkit_ROOT=!PREFIX!"
+    rem CUDA Toolkit files (including nvcc.exe) live in %PREFIX%\Library on Windows
+    set "CUDA_TOOLKIT_ROOT_DIR=!PREFIX!\Library"
+    set "CUDA_HOME=!PREFIX!\Library"
+    set "CUDAToolkit_ROOT=!PREFIX!\Library"
 
     rem --------------------------------------------------------------------------
     rem Locate nvcc.exe.  On win‑64 the cuda‑nvcc package now places it in
@@ -116,7 +117,7 @@ if exist "!Torch_ROOT!\lib\torch_python.lib" (
 )
 
 if defined CUDAToolkit_ROOT (
-    set "CMAKE_ARGS=!CMAKE_ARGS! -DCUDAToolkit_ROOT=!PREFIX!"
+    set "CMAKE_ARGS=!CMAKE_ARGS! -DCUDAToolkit_ROOT=!CUDAToolkit_ROOT!"
 )
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.

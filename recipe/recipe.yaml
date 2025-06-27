@@ -66,6 +66,7 @@ requirements:
             - libcusolver-dev
             - libcusparse-dev
 
+    # ---- C / C++ compilers --------------------------------------------------
     - ${{ compiler('cxx') }}
     - ${{ compiler('c') }}
     - ${{ stdlib("c") }}
@@ -78,8 +79,11 @@ requirements:
       then:
         # nvcc is mandatory at build‑time; platform‑specific names are needed.
         - ${{ compiler('cuda') }}
-        # Unified package name for all OSes since CUDA ≥ 12.2
-        - cuda-nvcc ${{ cuda_version }}.*
+
+        # nvcc package name differs on Windows.
+        - if: win
+          then: cuda-nvcc_win-64 ${{ cuda_version }}.*
+          else: cuda-nvcc        ${{ cuda_version }}.*
         # Stay on the toolkit minor we are actually building for so that
         # `cuda‑nvcc` is available on Windows.
         - cuda-version ${{ cuda_version }}.*
@@ -104,7 +108,9 @@ requirements:
         # Host env executes `python -m pip install .`, so nvcc must also be
         # present here for CMake/`setuptools` discovery.
         - cuda-version ${{ cuda_version }}.*
-        - cuda-nvcc ${{ cuda_version }}.*
+        - if: win
+          then: cuda-nvcc_win-64 ${{ cuda_version }}.*
+          else: cuda-nvcc        ${{ cuda_version }}.*
 
     - if: match(cuda_version, ">=12")
       then:
