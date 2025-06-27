@@ -79,8 +79,8 @@ requirements:
         # nvcc is mandatory at build‑time; `compiler('cuda')` alone does not
         # pull it in on win‑64 yet.
         - ${{ compiler('cuda') }}
+        - cuda-nvcc                   # ensures nvcc.exe is present
         - cuda-version ==${{ cuda_version }}
-        - cuda-nvcc                   # ← provides nvcc.exe
 
   host:
     - python

@@ -62,18 +62,37 @@ rem      characters are treated as escape sequences and are dropped.  Replace
 rem      them with ‘/’ **after** CMAKE_ARGS is fully assembled.
 rem ---------------------------------------------------------------------------
 
-if exist "%Torch_ROOT%\lib\torch_python.lib" (
-    set "TORCH_PYTHON_LIBRARY=%Torch_ROOT%\lib\torch_python.lib"
-    REM >>>  APPEND *without* clobbering what we built so far
-    set "CMAKE_ARGS=%CMAKE_ARGS% -DTORCH_PYTHON_LIBRARY=%TORCH_PYTHON_LIBRARY%"
+:: ---------------------------------------------------------------------------
+:: Correctly *append* extra flags instead of replacing everything that
+:: rattler‑build has already put into CMAKE_ARGS.  Always use delayed
+:: expansion (!VAR!) so that %PREFIX% never survives into the final value.
+:: ---------------------------------------------------------------------------
+
+if exist "!Torch_ROOT!\lib\torch_python.lib" (
+    set "TORCH_PYTHON_LIBRARY=!Torch_ROOT!\lib\torch_python.lib"
+    set "CMAKE_ARGS=!CMAKE_ARGS! -DTORCH_PYTHON_LIBRARY=!TORCH_PYTHON_LIBRARY!"
 )
 
-REM Tell CMake where CUDA lives, **without** wiping the rest of the flags
 if defined CUDAToolkit_ROOT (
-    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=!PREFIX!"
+    set "CMAKE_ARGS=!CMAKE_ARGS! -DCUDAToolkit_ROOT=!PREFIX!"
 )
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
-set "CMAKE_ARGS=%CMAKE_ARGS:\=/%"
+set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"
+
+echo ================================================================================
+echo   [build.bat diagnostics]
+echo   PREFIX      = !PREFIX!
+echo   BUILD_PREFIX= !BUILD_PREFIX!
+echo   CUDACXX     = !CUDACXX!
+if exist "!CUDACXX!" (
+    echo   nvcc.exe FOUND at !CUDACXX!
+) else (
+    echo   ** WARNING: nvcc.exe NOT found at !CUDACXX!
+    echo   Directory listing of !PREFIX!\Library\bin follows:
+    dir /b "!PREFIX!\Library\bin"
+)
+echo   CMAKE_ARGS  = !CMAKE_ARGS!
+echo ================================================================================
 
 python -m pip install . -vv
