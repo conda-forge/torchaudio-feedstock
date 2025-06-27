@@ -76,8 +76,11 @@ requirements:
 
     - if: cuda == "true"
       then:
+        # nvcc is mandatory at build‑time; `compiler('cuda')` alone does not
+        # pull it in on win‑64 yet.
         - ${{ compiler('cuda') }}
         - cuda-version ==${{ cuda_version }}
+        - cuda-nvcc                   # ← provides nvcc.exe
 
   host:
     - python
@@ -96,7 +99,10 @@ requirements:
 
     - if: cuda == "true"
       then:
+        # Host env executes `python -m pip install .`, so nvcc must also be
+        # present here for CMake/`setuptools` discovery.
         - cuda-version ==${{ cuda_version }}
+        - cuda-nvcc
 
     - if: match(cuda_version, ">=12")
       then:
