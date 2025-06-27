@@ -4,7 +4,10 @@ context:
   name: torchaudio
   version: "2.5.1"
   build_number: 1
-  cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA", default="None") }}
+  # Honour the CUDA version coming from the variant configuration while still
+  # allowing an explicit developer override through CONDA_OVERRIDE_CUDA.
+  cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA",
+                            default=cuda_compiler_version | default("None")) }}
   cuda: ${{ "true" if cuda_version != "None" else "false" }}
   cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
   string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
