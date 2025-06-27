@@ -5,17 +5,17 @@ if not "%cuda_compiler_version%" == "None" (
   rem Set the CUDA arch list from
   rem https://github.com/conda-forge/pytorch-cpu-feedstock/blob/main/recipe/build_pytorch.sh
   if "%cuda_compiler_version%" == "12.6" (
-    set TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX
-    rem %CUDA_HOME% not set in CUDA 12.0. Using %PREFIX%
-    set CUDA_TOOLKIT_ROOT_DIR=%PREFIX%
-    rem CUDA_HOME must be set for the build to work in torchaudio
-    set CUDA_HOME=%PREFIX%
-    rem -----------------------------------------------------------------
-    rem  CMake ≥3.26 looks for CUDAToolkit_ROOT and/or CUDACXX.
-    rem  Expose both, in addition to the legacy CUDA_TOOLKIT_ROOT_DIR.
-    rem -----------------------------------------------------------------
-    set CUDAToolkit_ROOT=%CUDA_HOME%
-    set CUDACXX=%CUDAToolkit_ROOT%\bin\nvcc.exe
+    set "TORCH_CUDA_ARCH_LIST=5.0;6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0+PTX"
+
+    rem ────────────────────────────────────────────────────────────────
+    rem CUDA toolkit discovery – conda‑forge layout (CUDA 12.6)
+    rem   * nvcc.exe lives in  %PREFIX%\Library\bin
+    rem   * CMake ≥3.26 honours        CUDAToolkit_ROOT  or  CUDACXX
+    rem ────────────────────────────────────────────────────────────────
+    set "CUDA_TOOLKIT_ROOT_DIR=%PREFIX%"
+    set "CUDA_HOME=%PREFIX%"
+    set "CUDAToolkit_ROOT=%PREFIX%"
+    set "CUDACXX=%PREFIX%\Library\bin\nvcc.exe"
   ) else (
     echo "unsupported cuda version. edit build.bat"
     exit /b 1
@@ -63,7 +63,14 @@ if exist "%Torch_ROOT%\lib\torch_python.lib" (
     set "TORCH_PYTHON_LIBRARY=%Torch_ROOT%\lib\torch_python.lib"
     set "CMAKE_ARGS=%CMAKE_ARGS% -DTORCH_PYTHON_LIBRARY=%TORCH_PYTHON_LIBRARY%"
 )
-rem Tell CMake explicitly where to find the CUDA toolkit
+rem ────────────────────────────────────────────────────────────────
+rem If the caller passed an *empty* "-DCUDAToolkit_ROOT=" flag
+rem (common in conda-forge recipe tooling), replace it with the real
+rem path – CMake treats an empty value as a hard error.
+rem ────────────────────────────────────────────────────────────────
+set "CMAKE_ARGS=%CMAKE_ARGS: -DCUDAToolkit_ROOT== -DCUDAToolkit_ROOT=%PREFIX%"
+
+rem And make sure our own value wins:
 set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%CUDAToolkit_ROOT%"
 
 rem Keep back‑slashes from being stripped by shlex:
