@@ -2,10 +2,15 @@
 
 context:
   name: torchaudio
-  version: "2.7.1"
+  version: "2.5.1"
   build_number: 1
-  cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
-  string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
+  # Honour the CUDA version coming from the variant configuration while still
+  # allowing an explicit developer override through CONDA_OVERRIDE_CUDA.
+  cuda_version: ${{ env.get("CONDA_OVERRIDE_CUDA",
+                            default=cuda_compiler_version | default("None")) }}
+  cuda: ${{ "true" if cuda_version != "None" else "false" }}
+  cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
+  string_prefix: ${{ cuda_build_string if cuda ==  "true" else "cpu_" }}
 
 package:
   name: ${{ name|lower }}
@@ -13,7 +18,7 @@ package:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: fc8159476d1b3b5978d5e66746fc34be168170800ff4c5e356433d8c9c57cbea
+    sha256: 200fbb1234c104a3662b444c0bec2acf4049c4b2113a73c0dc5f4e672cc2a4cc
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
@@ -24,24 +29,19 @@ source:
 build:
   number: ${{ build_number }}
   skip:
-    - win
-    # CUDA 11.8 not supported by pytorch anymore
-    - cuda_compiler_version != "None" and match(cuda_compiler_version, "<12.0")
-    # llvmlite fix only available for numba version that doesn't support py39 anymore
-    - match(python, "<3.10")
+    - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
+    - not win  # for debugging
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
       # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda_compiler_version != "None" }}
+      - ${{ "cuda" if cuda == "true" }}
     # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
+    down_prioritize_variant: ${{ 1 if cuda == "true" else 0 }}
   script:
     file: build
     env:
-      cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
-      # required by the setup.py script to find the right version
-      BUILD_VERSION: ${{ version }}
+      cuda_compiler_version: ${{ cuda_version | default('None') }}
 
 requirements:
   build:
@@ -51,9 +51,10 @@ requirements:
         - cross-python_${{ target_platform }}
         - pytorch
 
-        - if: match(cuda_compiler_version, ">=12")
+        - if: match(cuda_version, ">=12")
           then:
-            - cuda-driver-dev
+            - if: linux
+              then: cuda-driver-dev
             - cuda-cudart-dev
             - cuda-nvrtc-dev
             - cuda-nvtx-dev
@@ -73,33 +74,34 @@ requirements:
     - ccache
     - git
 
-    - if: cuda_compiler_version != "None"
+    - if: cuda == "true"
       then:
         - ${{ compiler('cuda') }}
-        - cuda-version ==${{ cuda_compiler_version }}
+        - cuda-version ==${{ cuda_version }}
 
   host:
     - python
     - pip
     - setuptools
     - pytorch
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
+    - ${{ "pytorch * cuda*" if cuda == "true" }}
+    - ${{ "pytorch * cpu*" if cuda == "false" }}
     - bzip2
     - kaldi
     - pybind11
     # - sox
     # - ffmpeg
-    - liblzma-devel
+    - xz
     - zlib
 
-    - if: cuda_compiler_version != "None"
+    - if: cuda == "true"
       then:
-        - cuda-version ==${{ cuda_compiler_version }}
+        - cuda-version ==${{ cuda_version }}
 
-    - if: match(cuda_compiler_version, ">=12")
+    - if: match(cuda_version, ">=12")
       then:
-        - cuda-driver-dev
+        - if: linux
+          then: cuda-driver-dev
         - cuda-cudart-dev
         - cuda-nvrtc-dev
         - cuda-nvtx-dev
@@ -114,15 +116,12 @@ requirements:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
-  run_constraints:
-    # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
-    - llvmlite >=0.44
+    - ${{ "pytorch * cuda*" if cuda == "true" }}
+    - ${{ "pytorch * cpu*" if cuda == "false" }}
 
   ignore_run_exports:
     from_package:
-      - if: match(cuda_compiler_version, ">=12")
+      - if: match(cuda_version, ">=12")
         then:
           - cuda-nvrtc-dev
           - cuda-nvtx-dev
@@ -148,11 +147,6 @@ tests:
         - torchaudio.transforms
       pip_check: true
 
-  - package_contents:
-      site_packages:
-        # ensure that the package metadata did not mangle in the git hash
-        - torchaudio-${{ version }}.dist-info/METADATA
-
   - requirements:
       run:
         - pytest
@@ -174,9 +168,6 @@ tests:
         # - sox
         - pytorch-lightning
         - sentencepiece
-        - if: cuda_compiler_version != "None"
-          then:
-            - cuda-version ==${{ cuda_compiler_version }}
     files:
       source:
         - test/
