@@ -60,18 +60,14 @@ rem      them with ‘/’ **after** CMAKE_ARGS is fully assembled.
 rem ---------------------------------------------------------------------------
 
 if exist "%Torch_ROOT%\lib\torch_python.lib" (
-    rem Append — *do NOT overwrite* — otherwise the value becomes the literal
-    rem string "PREFIX", breaking the Ninja build.
     set "TORCH_PYTHON_LIBRARY=%Torch_ROOT%\lib\torch_python.lib"
+    REM >>>  APPEND *without* clobbering what we built so far
     set "CMAKE_ARGS=%CMAKE_ARGS% -DTORCH_PYTHON_LIBRARY=%TORCH_PYTHON_LIBRARY%"
 )
 
-rem -----------------------------------------------------------------
-rem Replace a *blank* "-DCUDAToolkit_ROOT=" (if present) with %PREFIX%.
-rem -----------------------------------------------------------------
-set "CMAKE_ARGS=%CMAKE_ARGS: -DCUDAToolkit_ROOT== -DCUDAToolkit_ROOT=%PREFIX%"
+REM Tell CMake where CUDA lives, **without** wiping the rest of the flags
 if defined CUDAToolkit_ROOT (
-    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%CUDAToolkit_ROOT%"
+    set "CMAKE_ARGS=%CMAKE_ARGS% -DCUDAToolkit_ROOT=%PREFIX%"
 )
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
