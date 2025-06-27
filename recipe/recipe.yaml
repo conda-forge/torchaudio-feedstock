@@ -79,9 +79,10 @@ requirements:
         # nvcc is mandatory at build‑time; platform‑specific names are needed.
         - ${{ compiler('cuda') }}
         # Unified package name for all OSes since CUDA ≥ 12.2
-        - cuda-nvcc                   # ships nvcc.{bat|exe}
-        # 12.x toolkits are released only for selected minors; accept any 12.y
-        - cuda-version >=${{ cuda_version }},<13
+        - cuda-nvcc ${{ cuda_version }}.*
+        # Stay on the toolkit minor we are actually building for so that
+        # `cuda‑nvcc` is available on Windows.
+        - cuda-version ${{ cuda_version }}.*
 
   host:
     - python
@@ -102,8 +103,8 @@ requirements:
       then:
         # Host env executes `python -m pip install .`, so nvcc must also be
         # present here for CMake/`setuptools` discovery.
-        - cuda-version >=${{ cuda_version }},<13
-        - cuda-nvcc
+        - cuda-version ${{ cuda_version }}.*
+        - cuda-nvcc ${{ cuda_version }}.*
 
     - if: match(cuda_version, ">=12")
       then:
