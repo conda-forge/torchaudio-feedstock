@@ -179,6 +179,16 @@ tests:
         # - sox
         - pytorch-lightning
         - sentencepiece
+        # Keep test-env CUDA minor equal to build minor
+        - if: cuda_compiler_version is defined and cuda_compiler_version != "None"
+          then:
+            - cuda-version  ${{ cuda_compiler_version }}.*
+            - cuda-cudart   ${{ cuda_compiler_version }}.*
+            - cuda-cupti    ${{ cuda_compiler_version }}.*
+            - cuda-nvrtc    ${{ cuda_compiler_version }}.*
+            - libcublas     ${{ cuda_compiler_version }}.*
+            - libcudnn
+            - libcudnn-dev
     files:
       source:
         - test/
