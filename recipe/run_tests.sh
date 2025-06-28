@@ -1,6 +1,15 @@
 #!/bin/bash
 set -ex
 
+# ────────────────────────────────────────────────────────────────
+# Detect Windows so we can apply OS-specific skips only when
+# needed.  Works under Git-Bash/MSYS and CMD-spawned bash.
+# ────────────────────────────────────────────────────────────────
+IS_WINDOWS=0
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OS" == "Windows_NT" ]]; then
+  IS_WINDOWS=1
+fi
+
 export CI=true
 
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_CMD_APPLY_CMVN_SLIDING="true"
@@ -77,8 +86,13 @@ tests_to_skip="test_quantize_torchscript_2_wav2vec2_large_lv60k or ${tests_to_sk
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "cygwin" ]] || [[ -n "$WINDIR" ]]; then
     tests_to_skip="TestWaveRNN or ${tests_to_skip}"
     tests_to_skip="test_waveform or ${tests_to_skip}"
-    # Wav2Vec2 large model TorchScript tests also fail with memory issues
-    tests_to_skip="test_finetune_torchscript or ${tests_to_skip}"
+    # Wav2Vec2 large model torchscript tests also fail with memory issues
+    tests_to_skip="test_finetune_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+fi
+
+# 2025-06-28: pre-train TorchScript variant crashes only on Windows
+if [[ "$IS_WINDOWS" == 1 ]]; then
+  tests_to_skip="test_pretrain_torchscript_1_wav2vec2_large or ${tests_to_skip}"
 fi
 
 # AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)

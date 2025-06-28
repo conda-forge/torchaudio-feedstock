@@ -134,10 +134,23 @@ echo   BUILD_CUDA_CTC_DECODER = !BUILD_CUDA_CTC_DECODER!
 echo   CUDAToolkit_ROOT = !CUDAToolkit_ROOT!
 echo   CUDA_HOME   = !CUDA_HOME!
 echo   TORCH_CUDA_ARCH_LIST = !TORCH_CUDA_ARCH_LIST!
-if exist "!CUDACXX!" (
-    echo   nvcc.exe FOUND at !CUDACXX!
+rem ───────────────────────────────────────────────────────────────
+rem Better diagnostics: tell "variable unset" apart from
+rem "variable set but file missing", so the path in the message
+rem is never blank.
+rem ───────────────────────────────────────────────────────────────
+if defined CUDACXX (
+    if exist "!CUDACXX!" (
+        echo   nvcc.exe FOUND at !CUDACXX!
+    ) else (
+        echo   ** WARNING: nvcc.exe NOT found at !CUDACXX!
+        echo   Directory listing of !PREFIX!\bin follows:
+        dir /b "!PREFIX!\bin"
+        echo   Directory listing of !PREFIX!\Library\bin follows:
+        dir /b "!PREFIX!\Library\bin"
+    )
 ) else (
-    echo   ** WARNING: nvcc.exe NOT found at !CUDACXX!
+    echo   ** WARNING: nvcc.exe NOT found ^(CUDACXX variable not set^)
     echo   Directory listing of !PREFIX!\bin follows:
     dir /b "!PREFIX!\bin"
     echo   Directory listing of !PREFIX!\Library\bin follows:
