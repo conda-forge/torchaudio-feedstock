@@ -1,6 +1,9 @@
 @echo On
 setlocal enabledelayedexpansion
 
+rem Set BUILD_VERSION to prevent setup.py from using a git-describe-based alpha version
+set BUILD_VERSION=%version%
+
 rem ================================================================================
 rem   [initial build.bat diagnostics]                         (added for debugging)
 rem ================================================================================
@@ -111,12 +114,12 @@ set Torch_ROOT=%SP_DIR%\torch
 
 rem ---------------------------------------------------------------------------
 rem Fixes needed only on Windows
-rem   1. torchaudio’s CMakeLists expects TORCH_PYTHON_LIBRARY to be defined,
+rem   1. torchaudio's CMakeLists expects TORCH_PYTHON_LIBRARY to be defined,
 rem      but recent PyTorch wheels no longer export it.  We point it at the
 rem      import library that ships with PyTorch.
-rem   2. The pyproject helper uses POSIX shlex to split %CMAKE_ARGS%; bare ‘\’
+rem   2. The pyproject helper uses POSIX shlex to split %CMAKE_ARGS%; bare '\'
 rem      characters are treated as escape sequences and are dropped.  Replace
-rem      them with ‘/’ **after** CMAKE_ARGS is fully assembled.
+rem      them with '/' **after** CMAKE_ARGS is fully assembled.
 rem ---------------------------------------------------------------------------
 
 :: ---------------------------------------------------------------------------
@@ -133,6 +136,12 @@ if exist "!Torch_ROOT!\lib\torch_python.lib" (
 if defined CUDAToolkit_ROOT (
     set "CMAKE_ARGS=!CMAKE_ARGS! -DCUDAToolkit_ROOT=!CUDAToolkit_ROOT!"
 )
+
+rem ---------------------------------------------------------------------------
+rem Increase stack size to prevent test failures (e.g., torch.jit.save) on Windows.
+rem This is a standard practice in conda-forge for large C++ projects.
+rem ---------------------------------------------------------------------------
+set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:8000000 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:8000000"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"

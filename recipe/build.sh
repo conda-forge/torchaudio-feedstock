@@ -1,6 +1,9 @@
 #!/bin/bash
 set -ex
 
+# Set BUILD_VERSION to prevent setup.py from using a git-describe-based alpha version
+export BUILD_VERSION="${version}"
+
 if [[ ${cuda_compiler_version} != "None" ]]; then
   # Set the CUDA arch list from
   # https://github.com/conda-forge/pytorch-cpu-feedstock/blob/main/recipe/build_pytorch.sh
