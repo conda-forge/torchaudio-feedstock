@@ -4,6 +4,8 @@ context:
   name: torchaudio
   version: "2.5.1"
   build_number: 1
+  # convenience: major.minor part of version, e.g. "2.5"
+  torchaudio_mm: ${{ (version | split(".") )[:2] | join(".") }}
   # Use cuda_compiler_version directly from variant; default to "None" for CPU builds
   cuda_version: ${{ cuda_compiler_version | default("None") }}
   cuda_build_string: cuda_${{ cuda_version | version_to_buildstring }}
@@ -88,8 +90,8 @@ requirements:
     - python
     - pip
     - setuptools
-    # torchaudio ⇔ pytorch major.minor must match (2.5.*)
-    - pytorch {{ version.split('.')[0] }}.{{ version.split('.')[1] }}.*
+    # torchaudio ⇔ pytorch major.minor must match (e.g. 2.5.*)
+    - pytorch ${{ torchaudio_mm }}.*
     - bzip2
     - kaldi
     - pybind11
@@ -126,7 +128,7 @@ requirements:
     - python
     - numpy
     - kaldi
-    - pytorch {{ version.split('.')[0] }}.{{ version.split('.')[1] }}.*
+    - pytorch ${{ torchaudio_mm }}.*
 
   ignore_run_exports:
     from_package:
