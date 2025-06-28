@@ -88,9 +88,8 @@ requirements:
     - python
     - pip
     - setuptools
-    - pytorch
-    - ${{ "pytorch * cuda*" if cuda_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_version == "None" }}
+    # torchaudio ⇔ pytorch major.minor must match (2.5.*)
+    - pytorch {{ version.split('.')[0] }}.{{ version.split('.')[1] }}.*
     - bzip2
     - kaldi
     - pybind11
@@ -127,8 +126,7 @@ requirements:
     - python
     - numpy
     - kaldi
-    - ${{ "pytorch * cuda*" if cuda_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_version == "None" }}
+    - pytorch {{ version.split('.')[0] }}.{{ version.split('.')[1] }}.*
 
   ignore_run_exports:
     from_package:
