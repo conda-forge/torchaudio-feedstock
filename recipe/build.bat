@@ -58,6 +58,19 @@ if not "%cuda_compiler_version%" == "None" (
         )
     )
 
+    rem ------------------------------------------------------------------
+    rem Cross-compile or exotic envs: nvcc might be on BUILD_PREFIX or PATH
+    rem ------------------------------------------------------------------
+    if not defined CUDACXX (
+        if exist "!BUILD_PREFIX!\bin\nvcc.exe" set "CUDACXX=!BUILD_PREFIX!\bin\nvcc.exe"
+    )
+    if not defined CUDACXX (
+        for %%i in (nvcc.exe) do (
+            set "NVCC_ON_PATH=%%~$PATH:i"
+            if not "!NVCC_ON_PATH!"=="" set "CUDACXX=!NVCC_ON_PATH!"
+        )
+    )
+
     rem Graceful degradation – skip the CUDA CTC decoder when nvcc is absent
     if not defined CUDACXX (
         echo "nvcc not found – disabling BUILD_CUDA_CTC_DECODER"

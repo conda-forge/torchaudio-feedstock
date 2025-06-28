@@ -34,17 +34,30 @@ export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_RIR="true"
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_FFMPEG="true"
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_SOX="true"
 
-# Base skip-set (unchanged)
-SKIP='test_cmuarctic_str or test_cmuarctic_path or test_unknown_subtype_warning \
-      or test_pretrain_torchscript_1_wav2vec2_large or test_finetune_torchscript_1_wav2vec2_large \
-      or test_waveform or TestWaveRNN \
-      or test_quantize_torchscript_2_wav2vec2_large_lv60k or test_quantize_torchscript_1_wav2vec2_large \
-      or test_pitch_shift_resample_kernel or test_PitchShift or test_oscillator_bank \
-      or test_paper_configuration or test_pitch_shift_shape__4 or test_pitch_shift_shape_2 \
-      or test_souden_mvdr or test_rtf_mvdr or test_mvdr_0_ref_channel or test_masking_iid \
-      or wavlm_large or hubert_pretrain_xlarge or hubert_pretrain_large \
-      or hubert_xlarge or hubert_large or test_forced_align or test_create_mel \
-      or test_simulate_rir or ray_tracing or rnnt or test_deemphasis or TestAutogradLfilterCPU'
+###############################################################################
+# Build the long -k skip expression **robustly on Windows**.
+# Newlines inside a single-quoted string break pytest's mini-parser when the
+# script runs under Git-Bash, producing "expected right parenthesis" errors.
+# The fix:
+#   1.  Put the list in a here-doc (readable in-source).
+#   2.  Collapse all whitespace to single spaces.
+#   3.  Feed the one-liner to pytest.
+###############################################################################
+SKIP="$(cat <<'EOF'
+test_cmuarctic_str or test_cmuarctic_path or test_unknown_subtype_warning
+or test_pretrain_torchscript_1_wav2vec2_large or test_finetune_torchscript_1_wav2vec2_large
+or test_waveform or TestWaveRNN
+or test_quantize_torchscript_2_wav2vec2_large_lv60k or test_quantize_torchscript_1_wav2vec2_large
+or test_pitch_shift_resample_kernel or test_PitchShift or test_oscillator_bank
+or test_paper_configuration or test_pitch_shift_shape__4 or test_pitch_shift_shape_2
+or test_souden_mvdr or test_rtf_mvdr or test_mvdr_0_ref_channel or test_masking_iid
+or wavlm_large or hubert_pretrain_xlarge or hubert_pretrain_large
+or hubert_xlarge or hubert_large or test_forced_align or test_create_mel
+or test_simulate_rir or ray_tracing or rnnt or test_deemphasis or TestAutogradLfilterCPU
+EOF
+)"
+# Flatten the whitespace/newlines.
+SKIP="$(echo "${SKIP}" | tr -s '[:space:]' ' ')"
 
 # Extra skips for Windows + CUDA (the ones that SIGABRT)
 if [[ "${target_platform}" == "win-64" && "${cuda_compiler_version}" != "None" ]]; then
