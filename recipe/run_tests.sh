@@ -106,6 +106,7 @@ fi
 # Extra skips for Windows + CUDA (the ones that SIGABRT)
 # `cuda_compiler_version` is not exported in the test env, so detect CUDA at runtime.
 if [[ "${target_platform}" == "win-64" ]]; then
+    # Skip TorchScript tests that OOM on Azure's 12 GB GPUs.
     if python - <<'PY' >/dev/null 2>&1
 import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)
 PY
