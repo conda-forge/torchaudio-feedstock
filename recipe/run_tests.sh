@@ -104,8 +104,14 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
 fi
 
 # Extra skips for Windows + CUDA (the ones that SIGABRT)
-if [[ "${target_platform}" == "win-64" && "${cuda_compiler_version}" != "None" ]]; then
-    tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
+# `cuda_compiler_version` is not exported in the test env, so detect CUDA at runtime.
+if [[ "${target_platform}" == "win-64" ]]; then
+    if python - <<'PY' >/dev/null 2>&1
+import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)
+PY
+    then
+        tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
+    fi
 fi
 
 pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
