@@ -104,13 +104,10 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
 fi
 
 # ── Windows-specific skips ────────────────────────────────────────────────
-# wav2vec2-Large-LV60k TorchScript tests OOM on Azure's 12 GB GPUs.
-# Skip them on Windows **only when CUDA is available**; keep them on CPU.
-if [[ "${target_platform}" == "win-64" ]] && python - <<'PY' >/dev/null 2>&1
-import torch, sys
-sys.exit(0 if torch.cuda.is_available() else 1)
-PY
-then
+# wav2vec2-Large-LV60k TorchScript tests blow up the Windows runner (stack
+# overflow / OOM) whether CUDA is present or not.  Skip them on *all* Windows
+# builds (CPU **and** CUDA).
+if [[ "${target_platform}" == "win-64" ]]; then
     tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
 fi
 
