@@ -103,16 +103,18 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     tests_to_skip="test_quantize_1_wav2vec2_large or ${tests_to_skip}"
 fi
 
-# Extra skips for Windows + CUDA (the ones that SIGABRT)
-# `cuda_compiler_version` is not exported in the test env, so detect CUDA at runtime.
-if [[ "${target_platform}" == "win-64" ]]; then
-    # Skip TorchScript tests that OOM on Azure's 12 GB GPUs.
-    if python - <<'PY' >/dev/null 2>&1
-import torch, sys; sys.exit(0 if torch.cuda.is_available() else 1)
+# ── Windows-specific skips ────────────────────────────────────────────────
+# wav2vec2-Large-LV60k TorchScript tests OOM on Azure's 12 GB GPUs.
+# Skip them on Windows **only when CUDA is available**; keep them on CPU.
+if [[ "${target_platform}" == "win-64" ]] && python - <<'PY' >/dev/null 2>&1
+import torch, sys
+sys.exit(0 if torch.cuda.is_available() else 1)
 PY
-    then
-        tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
-    fi
+then
+    tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
 fi
 
-pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
+# Flatten newlines so pytest -k parses cleanly
+tests_to_skip=$(echo "${tests_to_skip}" | tr -s ' ' | tr -d $'\n')
+
+pytest -k "not (${tests_to_skip})" -vv test/torchaudio_unittest/

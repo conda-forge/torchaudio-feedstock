@@ -139,10 +139,10 @@ if defined CUDAToolkit_ROOT (
 
 rem ---------------------------------------------------------------------------
 rem Increase stack size to prevent deep-recursion segfaults on Windows.
-rem 16 MB is the value used by other large C++ projects (e.g. onnxruntime).
-rem Apply to EXE, SHARED, and MODULE links.
+rem Match PyTorch feedstock: bump Windows linker stack to 32 MB (33554432)
+rem to prevent stack-overflow aborts when TorchScript serialises large models.
 rem ---------------------------------------------------------------------------
-set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:16000000 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:16000000 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:16000000"
+set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:33554432 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:33554432 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:33554432"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"
