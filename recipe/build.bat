@@ -140,11 +140,12 @@ if defined CUDAToolkit_ROOT (
 )
 
 rem ---------------------------------------------------------------------------
-rem Increase stack size to prevent deep-recursion segfaults (0xC0000005) on
-rem Azure Win-64 runners.  Conformer + Wav2Vec2 forward still overflows 64 MB,
-rem so bump the reserve to 128 MB (134 217 728).               #32
+rem Increase stack reserve further; WavLM TorchScript still overflows 128 MB,
+rem so bump the reserve to 256 MB (268 435 456).               #32
 rem ---------------------------------------------------------------------------
 set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:134217728 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:134217728 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:134217728"
+:: overwrite the three /STACK values we just injected
+set "CMAKE_ARGS=!CMAKE_ARGS:/STACK:134217728=/STACK:268435456!"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"

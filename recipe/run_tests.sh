@@ -102,6 +102,14 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     tests_to_skip="test_quantize_0_wav2vec2_large or ${tests_to_skip}"
     tests_to_skip="test_quantize_1_wav2vec2_large or ${tests_to_skip}"
 
+    # ---------------------------------------------------------------------
+    # WavLM-Base TorchScript still trips a stack-overflow (0xC0000005)
+    # on Azure Windows runners with PyTorch 2.5/CUDA 12.6.  Skip only the
+    # two TorchScript cases; keep the rest of TestWavLMModel running.  #32
+    # ---------------------------------------------------------------------
+    tests_to_skip="test_finetune_torchscript_0_wavlm_base or ${tests_to_skip}"
+    tests_to_skip="test_pretrain_torchscript_0_wavlm_base or ${tests_to_skip}"
+
     # -------------------------------------------------------------------------
     # Windows-only segfault (0xC0000005) in Emformer attention path triggered by
     #   TestSSLModel::test_extract_feature_{0,1}
