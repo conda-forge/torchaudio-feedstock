@@ -116,7 +116,7 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     # (access-violation 0xC0000005).  Skip the whole module for now.
     #                                                     torchaudio-feedstock#32
     # -------------------------------------------------------------------------
-    tests_to_skip="conv_emformer_cpu_test or ConvEmformer.* or ${tests_to_skip}"
+    tests_to_skip="conv_emformer_cpu_test or ConvEmformer or ${tests_to_skip}"
 
     # -------------------------------------------------------------------------
     # Windows-only segfault (0xC0000005) in Emformer attention path triggered by

@@ -1,9 +1,9 @@
 #!/bin/bash
 set -ex
 
-# Set BUILD_VERSION to prevent setup.py from using a git-describe-based alpha version
+# Tell setuptools-scm to use the exact recipe version (no "a0" suffix)
+export SETUPTOOLS_SCM_PRETEND_VERSION="${version}"
 export BUILD_VERSION="${version}"
-# Ensure torchaudio's setup.py sees the correct version (avoids "2.5.1a0" dist-info)
 export TORCHAUDIO_BUILD_VERSION="${version}"
 
 if [[ ${cuda_compiler_version} != "None" ]]; then

@@ -1,9 +1,9 @@
 @echo On
 setlocal enabledelayedexpansion
 
-rem Set BUILD_VERSION to prevent setup.py from using a git-describe-based alpha version
+rem Set explicit version so setuptools-scm does not create an "a0" suffix
+set "SETUPTOOLS_SCM_PRETEND_VERSION=%version%"
 set BUILD_VERSION=%version%
-rem Ensure torchaudio's setup.py sees the correct version (avoids "2.5.1a0" dist-info)
 set TORCHAUDIO_BUILD_VERSION=%version%
 
 rem ================================================================================
