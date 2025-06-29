@@ -10,7 +10,7 @@ conda_build:
 conda_build_tool: rattler-build
 conda_forge_output_validation: true
 remote_ci_setup:
-  - "conda-forge-ci-setup>=4.9.4"  # make CI helpers new enough to understand “skipped” jobs
+  - "conda-forge-ci-setup>=4.9.4"  # make CI helpers new enough to understand "skipped" jobs
 github:
   branch_name: main
   tooling_branch_name: main
