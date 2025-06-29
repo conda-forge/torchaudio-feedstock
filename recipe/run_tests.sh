@@ -111,6 +111,14 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     tests_to_skip="test_pretrain_torchscript_0_wavlm_base or ${tests_to_skip}"
 
     # -------------------------------------------------------------------------
+    # Emformer TorchScript tests (`conv_emformer_cpu_test.py`) still exhaust
+    # the thread stack on Windows with PyTorch 2.5 + Python ≥ 3.11
+    # (access-violation 0xC0000005).  Skip the whole module for now.
+    #                                                     torchaudio-feedstock#32
+    # -------------------------------------------------------------------------
+    tests_to_skip="conv_emformer_cpu_test or ConvEmformer.* or ${tests_to_skip}"
+
+    # -------------------------------------------------------------------------
     # Windows-only segfault (0xC0000005) in Emformer attention path triggered by
     #   TestSSLModel::test_extract_feature_{0,1}
     # Even with the larger stack, keep this skip as a safety-net on CI.       #32

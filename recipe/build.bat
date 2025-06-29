@@ -140,12 +140,13 @@ if defined CUDAToolkit_ROOT (
 )
 
 rem ---------------------------------------------------------------------------
-rem Increase stack reserve further; WavLM TorchScript still overflows 128 MB,
-rem so bump the reserve to 256 MB (268 435 456).               #32
+rem Increase stack reserve further; WavLM / Emformer TorchScript still
+rem overflows 128 MB on Windows.  Bump the reserve to 512 MB
+rem (536 870 912) for extra head-room.                         #32
 rem ---------------------------------------------------------------------------
 set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:134217728 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:134217728 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:134217728"
 :: overwrite the three /STACK values we just injected
-set "CMAKE_ARGS=!CMAKE_ARGS:/STACK:134217728=/STACK:268435456!"
+set "CMAKE_ARGS=!CMAKE_ARGS:/STACK:134217728=/STACK:536870912!"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"
