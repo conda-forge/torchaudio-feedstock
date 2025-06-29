@@ -95,6 +95,14 @@ tests_to_skip="test_waveform or ${tests_to_skip}"
 tests_to_skip="TestWaveRNN or ${tests_to_skip}"
 tests_to_skip="test_pitch_shift_shape__4 or ${tests_to_skip}"
 
+# ──────────────────────────────────────────────────────────────────────
+# WAV2VEC2-Large-LV60k TorchScript OOM on Azure Linux runners (#32)
+# Loads a ~1.6 GB checkpoint and pushes container RAM past limit.
+# Skip on **all** platforms (CPU & CUDA) to keep CI reliable.
+# ──────────────────────────────────────────────────────────────────────
+tests_to_skip="test_pretrain_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+
 # OOM on **Windows** CI: these tests load a 480 MB wav2vec2-large checkpoint
 # and quantize it, pushing RAM to ~3 GB.  The Azure win-64 runner crashes
 # (0xC0000005).  They still run on Linux/macOS, where RAM is sufficient.
