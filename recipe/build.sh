@@ -52,6 +52,23 @@ export CMAKE_C_COMPILER="$CC"
 export CMAKE_CXX_COMPILER="$CXX"
 export CMAKE_GENERATOR="Ninja"
 
+# ───────────────────────────────────────────────────────────────
+# Cross-compile fix: strip host-CPU –march/–mtune flags that
+# were injected when the x86_64 compilers activated.  They break
+# the aarch64 tool-chain with "unknown architecture 'nocona'"
+# once we switch to it.
+# Applies only when build ≠ target platform.
+# ───────────────────────────────────────────────────────────────
+if [[ "${build_platform}" != "${target_platform}" ]]; then
+  for var in CFLAGS CXXFLAGS CPPFLAGS; do
+    tmp="$(eval echo \${${var}})"
+    # Remove any "-march=FOO" or "-mtune=BAR" fragment
+    tmp="${tmp//-march=[^ ]*/}"
+    tmp="${tmp//-mtune=[^ ]*/}"
+    eval export ${var}='"${tmp}"'
+  done
+fi
+
 # -------------------------------------------------------------------------------
 #   [build.sh diagnostics]                                         (added debug)
 # -------------------------------------------------------------------------------
