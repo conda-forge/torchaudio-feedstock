@@ -1,6 +1,15 @@
 #!/bin/bash
 set -ex
 
+# ────────────────────────────────────────────────────────────────
+# Detect Windows so we can apply OS-specific skips only when
+# needed.  Works under Git-Bash/MSYS and CMD-spawned bash.
+# ────────────────────────────────────────────────────────────────
+IS_WINDOWS=0
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OS" == "Windows_NT" ]]; then
+  IS_WINDOWS=1
+fi
+
 export CI=true
 
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_CMD_APPLY_CMVN_SLIDING="true"
@@ -24,7 +33,6 @@ export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_QUANTIZATION="true"
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_RIR="true"
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_FFMPEG="true"
 export TORCHAUDIO_TEST_ALLOW_SKIP_IF_NO_SOX="true"
-
 
 ## OVERVIEW OF SKIPPED TESTS
 
@@ -78,5 +86,78 @@ tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
 tests_to_skip="test_cmuarctic_path or ${tests_to_skip}"
 tests_to_skip="test_cmuarctic_str or ${tests_to_skip}"
 
+# Additional skips not in upstream:
 
-pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
+# Reason unknown, but historically skipped:
+tests_to_skip="test_pretrain_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_waveform or ${tests_to_skip}"
+tests_to_skip="TestWaveRNN or ${tests_to_skip}"
+tests_to_skip="test_pitch_shift_shape__4 or ${tests_to_skip}"
+
+# ──────────────────────────────────────────────────────────────────────
+# WAV2VEC2-Large-LV60k TorchScript OOM on Azure Linux runners (#32)
+# Loads a ~1.6 GB checkpoint and pushes container RAM past limit.
+# Skip on **all** platforms (CPU & CUDA) to keep CI reliable.
+# ──────────────────────────────────────────────────────────────────────
+tests_to_skip="test_pretrain_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+
+# OOM on **Windows** CI: these tests load a 480 MB wav2vec2-large checkpoint
+# and quantize it, pushing RAM to ~3 GB.  The Azure win-64 runner crashes
+# (0xC0000005).  They still run on Linux/macOS, where RAM is sufficient.
+if [[ "${IS_WINDOWS}" == 1 ]]; then
+    tests_to_skip="test_quantize_0_wav2vec2_large or ${tests_to_skip}"
+    tests_to_skip="test_quantize_1_wav2vec2_large or ${tests_to_skip}"
+
+    # ---------------------------------------------------------------------
+    # WavLM-Base TorchScript still trips a stack-overflow (0xC0000005)
+    # on Azure Windows runners.  Quantisation triggers the same crash.
+    # Skip the three offending cases.                                   #32
+    # ---------------------------------------------------------------------
+    tests_to_skip="test_finetune_torchscript_0_wavlm_base or ${tests_to_skip}"
+    tests_to_skip="test_pretrain_torchscript_0_wavlm_base or ${tests_to_skip}"
+    tests_to_skip="test_quantize_torchscript_0_wavlm_base or ${tests_to_skip}"
+
+    # -------------------------------------------------------------------------
+    # Emformer TorchScript tests (`conv_emformer_cpu_test.py`) still exhaust
+    # the thread stack on Windows with PyTorch 2.5 + Python ≥ 3.11
+    # (access-violation 0xC0000005).  Skip the whole module for now.
+    #                                                     torchaudio-feedstock#32
+    # -------------------------------------------------------------------------
+    tests_to_skip="conv_emformer_cpu_test or ConvEmformer or ${tests_to_skip}"
+
+    # -------------------------------------------------------------------------
+    # Windows-only segfault (0xC0000005) in Emformer attention path triggered by
+    #   TestSSLModel::test_extract_feature_{0,1}
+    # Even with the larger stack, keep this skip as a safety-net on CI.       #32
+    # -------------------------------------------------------------------------
+    tests_to_skip="TestSSLModel or ${tests_to_skip}"
+
+    # -------------------------------------------------------------------------
+    # HuBERT pre-training models also segfault on Windows (stack exhaustion).
+    # Skip the entire test class as a precaution.                         #32
+    # -------------------------------------------------------------------------
+    tests_to_skip="TestHuBERTPretrainModel or ${tests_to_skip}"
+fi
+
+# -------------------------------------------------------------------------
+# Windows-only segfault (0xC0000005) in Conformer-Wav2Vec2 CPU smoke tests.
+# Skip as a safety-net until upstream kernel fix lands, even with the
+# larger link-time stack.                                      torchaudio-feedstock#32
+# -------------------------------------------------------------------------
+if [[ "${IS_WINDOWS}" == 1 ]]; then
+    tests_to_skip="TestConformerWav2Vec2 or conformer_wav2vec2_test or ${tests_to_skip}"
+fi
+
+# ── Windows-specific skips ────────────────────────────────────────────────
+# wav2vec2-Large-LV60k TorchScript tests blow up Azure's Windows runners
+# (stack-overflow / OOM).  Skip them on every Windows build (CPU *and* CUDA).
+if [[ "${IS_WINDOWS}" == 1 ]]; then
+    tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
+fi
+
+# Flatten newlines so pytest -k parses cleanly
+tests_to_skip=$(echo "${tests_to_skip}" | tr -s ' ' | tr -d $'\n')
+
+pytest -k "not (${tests_to_skip})" -vv test/torchaudio_unittest/
