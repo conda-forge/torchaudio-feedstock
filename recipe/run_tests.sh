@@ -110,6 +110,15 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     tests_to_skip="TestSSLModel or ${tests_to_skip}"
 fi
 
+# -------------------------------------------------------------------------
+# Windows-only segfault (0xC0000005) in Conformer-Wav2Vec2 CPU smoke tests.
+# Skip as a safety-net until upstream kernel fix lands, even with the
+# larger link-time stack.                                      torchaudio-feedstock#32
+# -------------------------------------------------------------------------
+if [[ "${IS_WINDOWS}" == 1 ]]; then
+    tests_to_skip="TestConformerWav2Vec2 or conformer_wav2vec2_test or ${tests_to_skip}"
+fi
+
 # ── Windows-specific skips ────────────────────────────────────────────────
 # wav2vec2-Large-LV60k TorchScript tests blow up Azure's Windows runners
 # (stack-overflow / OOM).  Skip them on every Windows build (CPU *and* CUDA).

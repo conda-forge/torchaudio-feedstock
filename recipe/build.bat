@@ -141,10 +141,10 @@ if defined CUDAToolkit_ROOT (
 
 rem ---------------------------------------------------------------------------
 rem Increase stack size to prevent deep-recursion segfaults (0xC0000005) on
-rem Azure Win-64 runners.  64 MB (67108864) matches current PyTorch feedstock
-rem and fixes the Emformer crash hit in TestSSLModel.  See torchaudio-feedstock#32
+rem Azure Win-64 runners.  Conformer + Wav2Vec2 forward still overflows 64 MB,
+rem so bump the reserve to 128 MB (134 217 728).               #32
 rem ---------------------------------------------------------------------------
-set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:67108864 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:67108864 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:67108864"
+set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:134217728 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:134217728 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:134217728"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"
