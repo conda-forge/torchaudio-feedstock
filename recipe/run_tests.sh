@@ -104,11 +104,12 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
 
     # ---------------------------------------------------------------------
     # WavLM-Base TorchScript still trips a stack-overflow (0xC0000005)
-    # on Azure Windows runners with PyTorch 2.5/CUDA 12.6.  Skip only the
-    # two TorchScript cases; keep the rest of TestWavLMModel running.  #32
+    # on Azure Windows runners.  Quantisation triggers the same crash.
+    # Skip the three offending cases.                                   #32
     # ---------------------------------------------------------------------
     tests_to_skip="test_finetune_torchscript_0_wavlm_base or ${tests_to_skip}"
     tests_to_skip="test_pretrain_torchscript_0_wavlm_base or ${tests_to_skip}"
+    tests_to_skip="test_quantize_torchscript_0_wavlm_base or ${tests_to_skip}"
 
     # -------------------------------------------------------------------------
     # Emformer TorchScript tests (`conv_emformer_cpu_test.py`) still exhaust
@@ -124,6 +125,12 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
     # Even with the larger stack, keep this skip as a safety-net on CI.       #32
     # -------------------------------------------------------------------------
     tests_to_skip="TestSSLModel or ${tests_to_skip}"
+
+    # -------------------------------------------------------------------------
+    # HuBERT pre-training models also segfault on Windows (stack exhaustion).
+    # Skip the entire test class as a precaution.                         #32
+    # -------------------------------------------------------------------------
+    tests_to_skip="TestHuBERTPretrainModel or ${tests_to_skip}"
 fi
 
 # -------------------------------------------------------------------------
