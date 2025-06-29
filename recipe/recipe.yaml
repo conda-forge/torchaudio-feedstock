@@ -27,6 +27,10 @@ build:
   number: ${{ build_number }}
   skip:
     - match(cuda_compiler_version, "==11.8") and (aarch64 or win)
+    # Cross-compiling CUDA ≥ 12 for aarch64 currently fails to find
+    # <cuda_runtime.h>.  This variant isn’t required for Windows support,
+    # so disable it until torchaudio’s CMake is fixed upstream.
+    - aarch64 and cuda_compiler_version != "None"
     # llvmlite fix only available for numba version that doesn't support py39 anymore
     - match(python, "<3.10")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
