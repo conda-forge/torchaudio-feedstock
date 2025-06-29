@@ -104,10 +104,9 @@ if [[ "${IS_WINDOWS}" == 1 ]]; then
 fi
 
 # ── Windows-specific skips ────────────────────────────────────────────────
-# wav2vec2-Large-LV60k TorchScript tests blow up the Windows runner (stack
-# overflow / OOM) whether CUDA is present or not.  Skip them on *all* Windows
-# builds (CPU **and** CUDA).
-if [[ "${target_platform}" == "win-64" ]]; then
+# wav2vec2-Large-LV60k TorchScript tests blow up Azure's Windows runners
+# (stack-overflow / OOM).  Skip them on every Windows build (CPU *and* CUDA).
+if [[ "${IS_WINDOWS}" == 1 ]]; then
     tests_to_skip="${tests_to_skip} or test_pretrain_torchscript_2_wav2vec2_large_lv60k or test_finetune_torchscript_2_wav2vec2_large_lv60k"
 fi
 
