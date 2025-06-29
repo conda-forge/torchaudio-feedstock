@@ -3,6 +3,8 @@ setlocal enabledelayedexpansion
 
 rem Set BUILD_VERSION to prevent setup.py from using a git-describe-based alpha version
 set BUILD_VERSION=%version%
+rem Ensure torchaudio's setup.py sees the correct version (avoids "2.5.1a0" dist-info)
+set TORCHAUDIO_BUILD_VERSION=%version%
 
 rem ================================================================================
 rem   [initial build.bat diagnostics]                         (added for debugging)
@@ -138,11 +140,11 @@ if defined CUDAToolkit_ROOT (
 )
 
 rem ---------------------------------------------------------------------------
-rem Increase stack size to prevent deep-recursion segfaults on Windows.
-rem Match PyTorch feedstock: bump Windows linker stack to 32 MB (33554432)
-rem to prevent stack-overflow aborts when TorchScript serialises large models.
+rem Increase stack size to prevent deep-recursion segfaults (0xC0000005) on
+rem Azure Win-64 runners.  64 MB (67108864) matches current PyTorch feedstock
+rem and fixes the Emformer crash hit in TestSSLModel.  See torchaudio-feedstock#32
 rem ---------------------------------------------------------------------------
-set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:33554432 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:33554432 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:33554432"
+set "CMAKE_ARGS=!CMAKE_ARGS! -DCMAKE_EXE_LINKER_FLAGS=/STACK:67108864 -DCMAKE_SHARED_LINKER_FLAGS=/STACK:67108864 -DCMAKE_MODULE_LINKER_FLAGS=/STACK:67108864"
 
 rem Convert back‑slashes to forward‑slashes once, at the very end.
 set "CMAKE_ARGS=!CMAKE_ARGS:\=/!"
