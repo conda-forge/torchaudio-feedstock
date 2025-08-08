@@ -88,6 +88,7 @@ requirements:
     - bzip2
     - kaldi
     - pybind11
+    - torchcodec
     # - sox
     # - ffmpeg
     - liblzma-devel
@@ -114,6 +115,7 @@ requirements:
     - python
     - numpy
     - kaldi
+    - torchcodec
     - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
     - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
   run_constraints:
