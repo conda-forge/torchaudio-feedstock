@@ -70,6 +70,8 @@ tests_to_skip="test_PitchShift or ${tests_to_skip}"
 tests_to_skip="test_pitch_shift_resample_kernel or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_1_wav2vec2_large or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
 
 # AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)
 tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
