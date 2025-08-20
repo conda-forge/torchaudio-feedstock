@@ -84,5 +84,9 @@ tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
 tests_to_skip="test_cmuarctic_path or ${tests_to_skip}"
 tests_to_skip="test_cmuarctic_str or ${tests_to_skip}"
 
+# We don't build with sox, but this test fails with
+# RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
+tests_to_skip="test_torchscript_fails or ${tests_to_skip}"
+
 
 pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
