@@ -69,7 +69,13 @@ tests_to_skip="test_oscillator_bank or ${tests_to_skip}"
 tests_to_skip="test_PitchShift or ${tests_to_skip}"
 tests_to_skip="test_pitch_shift_resample_kernel or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_pretrain_torchscript_1_wav2vec2_large or ${tests_to_skip}"
+tests_to_skip="test_pretrain_torchscript_2_wav2vec2_large or ${tests_to_skip}"
 tests_to_skip="test_quantize_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_finetune_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_pretrain_torchscript_1_wav2vec2_large_lv60k or ${tests_to_skip}"
+tests_to_skip="test_pretrain_torchscript_2_wav2vec2_large_lv60k or ${tests_to_skip}"
 
 # AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)
 tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
@@ -77,6 +83,10 @@ tests_to_skip="test_unknown_subtype_warning or ${tests_to_skip}"
 # ValueError: bad delimiter value (in Python 3.13)
 tests_to_skip="test_cmuarctic_path or ${tests_to_skip}"
 tests_to_skip="test_cmuarctic_str or ${tests_to_skip}"
+
+# We don't build with sox, but this test fails with
+# RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
+tests_to_skip="test_torchscript_fails or ${tests_to_skip}"
 
 
 pytest -v test/torchaudio_unittest/ -k "not (${tests_to_skip})"
