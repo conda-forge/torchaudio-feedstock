@@ -3,7 +3,7 @@
 context:
   name: torchaudio
   version: "2.8.0"
-  build_number: 1
+  build_number: 2
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
@@ -26,10 +26,8 @@ build:
   number: ${{ build_number }}
   skip:
     - win
-    # CUDA 11.8 not supported by pytorch anymore
-    - cuda_compiler_version != "None" and match(cuda_compiler_version, "<12.0")
-    # llvmlite fix only available for numba version that doesn't support py39 anymore
-    - match(python, "<3.10")
+    # always hangs during tests
+    - osx and x86_64 and match(python, "==3.13")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
   variant:
     use_keys:
