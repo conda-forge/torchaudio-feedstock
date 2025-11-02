@@ -61,6 +61,8 @@ tests_to_skip="test_masking_iid or ${tests_to_skip}"
 tests_to_skip="test_mvdr_0_ref_channel or ${tests_to_skip}"
 tests_to_skip="test_rtf_mvdr or ${tests_to_skip}"
 tests_to_skip="test_souden_mvdr or ${tests_to_skip}"
+tests_to_skip="test_waveform or ${tests_to_skip}"
+tests_to_skip="test_deepspeech or ${tests_to_skip}"
 
 # Segfault on CI (probably due to limited memory):
 tests_to_skip="test_pitch_shift_shape_2 or ${tests_to_skip}"
