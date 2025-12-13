@@ -192,11 +192,11 @@ outputs:
         script:
           interpreter: python
           content:
-            - import pytest
-            - import os, sys
-            - vars = ["NO_AUDIO_OUT_DEVICE", "NO_CMD_APPLY_CMVN_SLIDING", "NO_CMD_COMPUTE_FBANK_FEATS", "NO_CMD_COMPUTE_KALDI_PITCH_FEATS", "NO_CMD_COMPUTE_MFCC_FEATS", "NO_CMD_COMPUTE_SPECTROGRAM_FEATS", "NO_CTC_DECODER", "NO_CUDA", "NO_FFMPEG", "NO_HW_ACCEL", "NO_KALDI", "NO_MACOS", "NO_MOD_demucs", "NO_MOD_fairseq", "NO_QUANTIZATION", "NO_RIR", "NO_SOX", "NO_SOX_DECODER", "NO_SOX_ENCODER", "ON_PYTHON_310", "TEMPORARY_DISABLED"]
-            - for var in vars: os.environ[f"TORCHAUDIO_TEST_ALLOW_SKIP_IF_{var}"] = "true"
-            - os.environ["CI"] = "true"
+            - 'import pytest'
+            - 'import os, sys'
+            - 'vars = ["NO_AUDIO_OUT_DEVICE", "NO_CMD_APPLY_CMVN_SLIDING", "NO_CMD_COMPUTE_FBANK_FEATS", "NO_CMD_COMPUTE_KALDI_PITCH_FEATS", "NO_CMD_COMPUTE_MFCC_FEATS", "NO_CMD_COMPUTE_SPECTROGRAM_FEATS", "NO_CTC_DECODER", "NO_CUDA", "NO_FFMPEG", "NO_HW_ACCEL", "NO_KALDI", "NO_MACOS", "NO_MOD_demucs", "NO_MOD_fairseq", "NO_QUANTIZATION", "NO_RIR", "NO_SOX", "NO_SOX_DECODER", "NO_SOX_ENCODER", "ON_PYTHON_310", "TEMPORARY_DISABLED"]'
+            - 'for var in vars: os.environ[f"TORCHAUDIO_TEST_ALLOW_SKIP_IF_{var}"] = "true"'
+            - 'os.environ["CI"] = "true"'
             - 'tests_to_skip = "_not_a_real_test"'
             # Output 0 of UnbindBackward0 is a view and is being modified inplace.
             # This view is the output of a function that returns multiple views.
