@@ -142,7 +142,6 @@ outputs:
             - torchaudio.functional
             - torchaudio.models
             - torchaudio.pipelines
-            - torchaudio.kaldi_io
             - torchaudio.utils
             - torchaudio.sox_effects
             - torchaudio.transforms
