@@ -134,7 +134,6 @@ tests:
   - python:
       imports:
         - torchaudio
-        - torchaudio.backend
         - torchaudio.compliance
         - torchaudio.datasets
         - torchaudio.functional
