@@ -143,7 +143,6 @@ outputs:
             - torchaudio.models
             - torchaudio.pipelines
             - torchaudio.utils
-            - torchaudio.sox_effects
             - torchaudio.transforms
           pip_check: true
 
