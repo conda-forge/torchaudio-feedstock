@@ -6,7 +6,7 @@ context:
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
-package:
+recipe:
   name: torchaudio
   version: ${{ version }}
 
@@ -24,26 +24,78 @@ build:
   skip:
     - win
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
-  variant:
-    use_keys:
-      # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda_compiler_version != "None" }}
-    # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
-  script:
-    file: build
-    env:
-      cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
-      # required by the setup.py script to find the right version
-      BUILD_VERSION: ${{ version }}
 
-requirements:
-  build:
-    - if: build_platform != target_platform
-      then:
+outputs:
+  - package:
+      name: torchaudio
+    build:
+      variant:
+        use_keys:
+          # use cuda from the variant config, e.g. to build multiple CUDA variants
+          - ${{ "cuda" if cuda_compiler_version != "None" }}
+        # this will down-prioritize the cuda variant versus other variants of the package
+        down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
+      script:
+        file: build
+        env:
+          cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
+          # required by the setup.py script to find the right version
+          BUILD_VERSION: ${{ version }}
+
+    requirements:
+      build:
+        - if: build_platform != target_platform
+          then:
+            - python
+            - cross-python_${{ target_platform }}
+            - pytorch
+
+            - if: match(cuda_compiler_version, ">=12")
+              then:
+                - cuda-driver-dev
+                - cuda-cudart-dev
+                - cuda-nvrtc-dev
+                - cuda-nvtx-dev
+                - cuda-nvml-dev
+                - cuda-profiler-api
+                - libcublas-dev
+                - libcufft-dev
+                - libcurand-dev
+                - libcusolver-dev
+                - libcusparse-dev
+
+        - ${{ compiler('cxx') }}
+        - ${{ compiler('c') }}
+        - ${{ stdlib("c") }}
+        - cmake
+        - ninja
+        - ccache
+        - git
+
+        - if: cuda_compiler_version != "None"
+          then:
+            - ${{ compiler('cuda') }}
+            - cuda-version ==${{ cuda_compiler_version }}
+
+      host:
         - python
-        - cross-python_${{ target_platform }}
+        - pip
+        - setuptools
         - pytorch
+        - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+        - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
+        - bzip2
+        - kaldi
+        - pybind11
+        - torchcodec
+        # - sox
+        # - ffmpeg
+        - liblzma-devel
+        - zlib
+
+        - if: cuda_compiler_version != "None"
+          then:
+            - cuda-version ==${{ cuda_compiler_version }}
 
         - if: match(cuda_compiler_version, ">=12")
           then:
@@ -58,128 +110,89 @@ requirements:
             - libcurand-dev
             - libcusolver-dev
             - libcusparse-dev
-
-    - ${{ compiler('cxx') }}
-    - ${{ compiler('c') }}
-    - ${{ stdlib("c") }}
-    - cmake
-    - ninja
-    - ccache
-    - git
-
-    - if: cuda_compiler_version != "None"
-      then:
-        - ${{ compiler('cuda') }}
-        - cuda-version ==${{ cuda_compiler_version }}
-
-  host:
-    - python
-    - pip
-    - setuptools
-    - pytorch
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
-    - bzip2
-    - kaldi
-    - pybind11
-    - torchcodec
-    # - sox
-    # - ffmpeg
-    - liblzma-devel
-    - zlib
-
-    - if: cuda_compiler_version != "None"
-      then:
-        - cuda-version ==${{ cuda_compiler_version }}
-
-    - if: match(cuda_compiler_version, ">=12")
-      then:
-        - cuda-driver-dev
-        - cuda-cudart-dev
-        - cuda-nvrtc-dev
-        - cuda-nvtx-dev
-        - cuda-nvml-dev
-        - cuda-profiler-api
-        - libcublas-dev
-        - libcufft-dev
-        - libcurand-dev
-        - libcusolver-dev
-        - libcusparse-dev
-  run:
-    - python
-    - numpy
-    - kaldi
-    - torchcodec
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
-  run_constraints:
-    # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
-    - llvmlite >=0.44
-
-  ignore_run_exports:
-    from_package:
-      - if: match(cuda_compiler_version, ">=12")
-        then:
-          - cuda-nvrtc-dev
-          - cuda-nvtx-dev
-          - libcublas-dev
-          - libcufft-dev
-          - libcurand-dev
-          - libcusolver-dev
-          - libcusparse-dev
-
-tests:
-  - python:
-      imports:
-        - torchaudio
-        - torchaudio.compliance
-        - torchaudio.datasets
-        - torchaudio.functional
-        - torchaudio.models
-        - torchaudio.pipelines
-        - torchaudio.kaldi_io
-        - torchaudio.utils
-        - torchaudio.sox_effects
-        - torchaudio.transforms
-      pip_check: true
-
-  - package_contents:
-      site_packages:
-        # ensure that the package metadata did not mangle in the git hash
-        - torchaudio-${{ version }}.dist-info/METADATA
-
-  - requirements:
       run:
-        - pytest
-        - scipy
+        - python
         - numpy
-        - librosa
-        - expecttest
-        - requests
-        - hypothesis
-        - inflect
-        # gpu version of kaldi tries to load libcuda, which we don't have
-        - kaldi * cpu*
-        - kaldi_io
-        - parameterized
-        - pysoundfile
-        - transformers
-        - unidecode
-        - inflect
-        # - sox
-        - pytorch-lightning
-        - sentencepiece
-        - if: cuda_compiler_version != "None"
-          then:
-            - cuda-version ==${{ cuda_compiler_version }}
-    files:
-      source:
-        - test/
-        - examples/
-      recipe:
-        - run_tests.sh
-    script:
-      - bash run_tests.sh
+        - kaldi
+        - torchcodec
+        - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+        - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
+      run_constraints:
+        # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
+        - llvmlite >=0.44
+
+      ignore_run_exports:
+        from_package:
+          - if: match(cuda_compiler_version, ">=12")
+            then:
+              - cuda-nvrtc-dev
+              - cuda-nvtx-dev
+              - libcublas-dev
+              - libcufft-dev
+              - libcurand-dev
+              - libcusolver-dev
+              - libcusparse-dev
+
+    tests:
+      - python:
+          imports:
+            - torchaudio
+            - torchaudio.compliance
+            - torchaudio.datasets
+            - torchaudio.functional
+            - torchaudio.models
+            - torchaudio.pipelines
+            - torchaudio.kaldi_io
+            - torchaudio.utils
+            - torchaudio.sox_effects
+            - torchaudio.transforms
+          pip_check: true
+
+      - package_contents:
+          site_packages:
+            # ensure that the package metadata did not mangle in the git hash
+            - torchaudio-${{ version }}.dist-info/METADATA
+
+  - package:
+      name: torchaudio-tests
+    build:
+      script: ${{ 'true' if unix else 'exit /b 0' }}
+    requirements:
+      run:
+        - ${{ pin_subpackage('torchaudio', exact=True) }}
+    tests:
+      - files:
+          source:
+            - test/
+            - examples/
+          recipe:
+            - run_tests.sh
+        requirements:
+          run:
+            - pytest
+            - scipy
+            - numpy
+            - librosa
+            - expecttest
+            - requests
+            - hypothesis
+            - inflect
+            # gpu version of kaldi tries to load libcuda, which we don't have
+            - kaldi * cpu*
+            - kaldi_io
+            - parameterized
+            - pysoundfile
+            - transformers
+            - unidecode
+            - inflect
+            # - sox
+            - pytorch-lightning
+            - sentencepiece
+            - if: cuda_compiler_version != "None"
+              then:
+                - cuda-version ==${{ cuda_compiler_version }}
+        script:
+          - bash run_tests.sh
 
 about:
   homepage: https://github.com/pytorch/audio
