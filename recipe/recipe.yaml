@@ -18,6 +18,8 @@ source:
       - patches/0002-use-conda-cuda.patch
       - patches/0003-Apply-CMAKE_ARGS-if-set.patch
       - patches/0004-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
+      # backport https://github.com/pytorch/audio/pull/4069
+      - patches/0005-Fix-torchscript-related-test-failures.-4069.patch
 
 build:
   number: ${{ build_number }}
