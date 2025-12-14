@@ -156,10 +156,12 @@ outputs:
   - package:
       name: torchaudio-tests
     build:
+      skip:
+        - cuda_compiler_version != "None"
       script: ${{ 'true' if unix else 'exit /b 0' }}
     requirements:
       run:
-        - ${{ pin_subpackage('torchaudio', exact=True) }}
+        - torchaudio ${{ version }}.* *_${{ build_number }}
     tests:
       - files:
           source:
@@ -188,9 +190,6 @@ outputs:
             # - sox
             - pytorch-lightning
             - sentencepiece
-            - if: cuda_compiler_version != "None"
-              then:
-                - cuda-version ==${{ cuda_compiler_version }}
         script:
           interpreter: python
           content:
