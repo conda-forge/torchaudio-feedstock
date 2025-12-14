@@ -1,54 +1,103 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 
 context:
-  name: torchaudio
-  version: "2.8.0"
-  build_number: 2
+  version: "2.9.1"
+  build_number: 0
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
-package:
-  name: ${{ name|lower }}
+recipe:
+  name: torchaudio
   version: ${{ version }}
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 8809e4b0fa1635a89d5b05fe8e6e1db79fc0cc2052474ef6e76e349755827c12
+    sha256: 590492c90552959b3df6f601eb733135064bf2d9e53c516adcf6845a4e545662
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
       - patches/0003-Apply-CMAKE_ARGS-if-set.patch
-      - patches/0004-Add-missing-skipIfNoFFmpeg-for-TestFileObject.patch
-      - patches/0005-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
-      - patches/4039.patch
+      - patches/0004-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
+      # backport https://github.com/pytorch/audio/pull/4069
+      - patches/0005-Fix-torchscript-related-test-failures.-4069.patch
 
 build:
   number: ${{ build_number }}
   skip:
     - win
-    # always hangs during tests
-    - osx and x86_64 and match(python, "==3.13")
   string: ${{ string_prefix }}py${{ python | version_to_buildstring }}h${{ hash }}_${{ build_number }}
-  variant:
-    use_keys:
-      # use cuda from the variant config, e.g. to build multiple CUDA variants
-      - ${{ "cuda" if cuda_compiler_version != "None" }}
-    # this will down-prioritize the cuda variant versus other variants of the package
-    down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
-  script:
-    file: build
-    env:
-      cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
-      # required by the setup.py script to find the right version
-      BUILD_VERSION: ${{ version }}
 
-requirements:
-  build:
-    - if: build_platform != target_platform
-      then:
+outputs:
+  - package:
+      name: torchaudio
+    build:
+      variant:
+        use_keys:
+          # use cuda from the variant config, e.g. to build multiple CUDA variants
+          - ${{ "cuda" if cuda_compiler_version != "None" }}
+        # this will down-prioritize the cuda variant versus other variants of the package
+        down_prioritize_variant: ${{ 0 if cuda_compiler_version == "None" else 1 }}
+      script:
+        file: build
+        env:
+          cuda_compiler_version: ${{ cuda_compiler_version | default('None') }}
+          # required by the setup.py script to find the right version
+          BUILD_VERSION: ${{ version }}
+
+    requirements:
+      build:
+        - if: build_platform != target_platform
+          then:
+            - python
+            - cross-python_${{ target_platform }}
+            - pytorch
+
+            - if: match(cuda_compiler_version, ">=12")
+              then:
+                - cuda-driver-dev
+                - cuda-cudart-dev
+                - cuda-nvrtc-dev
+                - cuda-nvtx-dev
+                - cuda-nvml-dev
+                - cuda-profiler-api
+                - libcublas-dev
+                - libcufft-dev
+                - libcurand-dev
+                - libcusolver-dev
+                - libcusparse-dev
+
+        - ${{ compiler('cxx') }}
+        - ${{ compiler('c') }}
+        - ${{ stdlib("c") }}
+        - cmake
+        - ninja
+        - ccache
+        - git
+
+        - if: cuda_compiler_version != "None"
+          then:
+            - ${{ compiler('cuda') }}
+            - cuda-version ==${{ cuda_compiler_version }}
+
+      host:
         - python
-        - cross-python_${{ target_platform }}
+        - pip
+        - setuptools
         - pytorch
+        - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+        - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
+        - bzip2
+        - kaldi
+        - pybind11
+        - torchcodec
+        # - sox
+        # - ffmpeg
+        - liblzma-devel
+        - zlib
+
+        - if: cuda_compiler_version != "None"
+          then:
+            - cuda-version ==${{ cuda_compiler_version }}
 
         - if: match(cuda_compiler_version, ">=12")
           then:
@@ -63,129 +112,146 @@ requirements:
             - libcurand-dev
             - libcusolver-dev
             - libcusparse-dev
-
-    - ${{ compiler('cxx') }}
-    - ${{ compiler('c') }}
-    - ${{ stdlib("c") }}
-    - cmake
-    - ninja
-    - ccache
-    - git
-
-    - if: cuda_compiler_version != "None"
-      then:
-        - ${{ compiler('cuda') }}
-        - cuda-version ==${{ cuda_compiler_version }}
-
-  host:
-    - python
-    - pip
-    - setuptools
-    - pytorch
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
-    - bzip2
-    - kaldi
-    - pybind11
-    - torchcodec
-    # - sox
-    # - ffmpeg
-    - liblzma-devel
-    - zlib
-
-    - if: cuda_compiler_version != "None"
-      then:
-        - cuda-version ==${{ cuda_compiler_version }}
-
-    - if: match(cuda_compiler_version, ">=12")
-      then:
-        - cuda-driver-dev
-        - cuda-cudart-dev
-        - cuda-nvrtc-dev
-        - cuda-nvtx-dev
-        - cuda-nvml-dev
-        - cuda-profiler-api
-        - libcublas-dev
-        - libcufft-dev
-        - libcurand-dev
-        - libcusolver-dev
-        - libcusparse-dev
-  run:
-    - python
-    - numpy
-    - kaldi
-    - torchcodec
-    - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
-    - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
-  run_constraints:
-    # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
-    - llvmlite >=0.44
-
-  ignore_run_exports:
-    from_package:
-      - if: match(cuda_compiler_version, ">=12")
-        then:
-          - cuda-nvrtc-dev
-          - cuda-nvtx-dev
-          - libcublas-dev
-          - libcufft-dev
-          - libcurand-dev
-          - libcusolver-dev
-          - libcusparse-dev
-
-tests:
-  - python:
-      imports:
-        - torchaudio
-        - torchaudio.backend
-        - torchaudio.compliance
-        - torchaudio.datasets
-        - torchaudio.functional
-        - torchaudio.models
-        - torchaudio.pipelines
-        - torchaudio.kaldi_io
-        - torchaudio.utils
-        - torchaudio.sox_effects
-        - torchaudio.transforms
-      pip_check: true
-
-  - package_contents:
-      site_packages:
-        # ensure that the package metadata did not mangle in the git hash
-        - torchaudio-${{ version }}.dist-info/METADATA
-
-  - requirements:
       run:
-        - pytest
-        - scipy
+        - python
         - numpy
-        - librosa
-        - expecttest
-        - requests
-        - hypothesis
-        - inflect
-        # gpu version of kaldi tries to load libcuda, which we don't have
-        - kaldi * cpu*
-        - kaldi_io
-        - parameterized
-        - pysoundfile
-        - transformers
-        - unidecode
-        - inflect
-        # - sox
-        - pytorch-lightning
-        - sentencepiece
-        - if: cuda_compiler_version != "None"
-          then:
-            - cuda-version ==${{ cuda_compiler_version }}
-    files:
-      source:
-        - test/
-        - examples/
-      recipe:
-        - run_tests.sh
-    script:
-      - bash run_tests.sh
+        - kaldi
+        - torchcodec
+        - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+        - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
+      run_constraints:
+        # we need https://github.com/conda-forge/llvmlite-feedstock/pull/100
+        - llvmlite >=0.44
+
+      ignore_run_exports:
+        from_package:
+          - if: match(cuda_compiler_version, ">=12")
+            then:
+              - cuda-nvrtc-dev
+              - cuda-nvtx-dev
+              - libcublas-dev
+              - libcufft-dev
+              - libcurand-dev
+              - libcusolver-dev
+              - libcusparse-dev
+
+    tests:
+      - python:
+          imports:
+            - torchaudio
+            - torchaudio.compliance
+            - torchaudio.datasets
+            - torchaudio.functional
+            - torchaudio.models
+            - torchaudio.pipelines
+            - torchaudio.utils
+            - torchaudio.transforms
+          pip_check: true
+
+      - package_contents:
+          site_packages:
+            # ensure that the package metadata did not mangle in the git hash
+            - torchaudio-${{ version }}.dist-info/METADATA
+
+  - package:
+      name: torchaudio-tests
+    build:
+      skip:
+        - cuda_compiler_version != "None"
+      script: ${{ 'true' if unix else 'exit /b 0' }}
+    requirements:
+      run:
+        - torchaudio ${{ version }}.* *_${{ build_number }}
+    tests:
+      - files:
+          source:
+            - test/
+            - examples/
+          recipe:
+            - run_tests.sh
+        requirements:
+          run:
+            - pytest
+            - scipy
+            - numpy
+            - librosa
+            - expecttest
+            - requests
+            - hypothesis
+            - inflect
+            # gpu version of kaldi tries to load libcuda, which we don't have
+            - kaldi * cpu*
+            - kaldi_io
+            - parameterized
+            - pysoundfile
+            - transformers
+            - unidecode
+            - inflect
+            # - sox
+            - pytorch-lightning
+            - sentencepiece
+        script:
+          interpreter: python
+          content:
+            - 'import pytest'
+            - 'import os, sys'
+            - 'vars = ["NO_AUDIO_OUT_DEVICE", "NO_CMD_APPLY_CMVN_SLIDING", "NO_CMD_COMPUTE_FBANK_FEATS", "NO_CMD_COMPUTE_KALDI_PITCH_FEATS", "NO_CMD_COMPUTE_MFCC_FEATS", "NO_CMD_COMPUTE_SPECTROGRAM_FEATS", "NO_CTC_DECODER", "NO_CUDA", "NO_FFMPEG", "NO_HW_ACCEL", "NO_KALDI", "NO_MACOS", "NO_MOD_demucs", "NO_MOD_fairseq", "NO_QUANTIZATION", "NO_RIR", "NO_SOX", "NO_SOX_DECODER", "NO_SOX_ENCODER", "ON_PYTHON_310", "TEMPORARY_DISABLED"]'
+            - 'for var in vars: os.environ[f"TORCHAUDIO_TEST_ALLOW_SKIP_IF_{var}"] = "true"'
+            - 'os.environ["CI"] = "true"'
+            - 'tests_to_skip = "_not_a_real_test"'
+            # Output 0 of UnbindBackward0 is a view and is being modified inplace.
+            # This view is the output of a function that returns multiple views.
+            # Such functions do not allow the output views to be modified inplace.
+            # You should replace the inplace operation by an out-of-place one.
+            - 'tests_to_skip += " or TestAutogradLfilterCPU"'
+            - 'tests_to_skip += " or test_deemphasis"'
+            # 'torchaudio' object has no attribute 'rnnt_loss'
+            - 'tests_to_skip += " or rnnt"'
+            # 'torchaudio' object has no attribute 'ray_tracing'
+            - 'tests_to_skip += " or ray_tracing"'
+            # object has no attribute _simulate_rir:
+            - 'tests_to_skip += " or test_simulate_rir"'
+            # ValueError: invalid version number '0.10.2.post1'
+            - 'tests_to_skip += " or test_create_mel"'
+            # RuntimeError: torchaudio.functional._alignment.forced_align Requires alignment extension, but TorchAudio is not compiled with it.
+            # Please build TorchAudio with alignment support.
+            - 'tests_to_skip += " or test_forced_align"'
+            # Very slow on CI:
+            - 'tests_to_skip += " or hubert_large"'
+            - 'tests_to_skip += " or hubert_xlarge"'
+            - 'tests_to_skip += " or hubert_pretrain_large"'
+            - 'tests_to_skip += " or hubert_pretrain_xlarge"'
+            - 'tests_to_skip += " or wavlm_large"'
+            - 'tests_to_skip += " or test_masking_iid"'
+            - 'tests_to_skip += " or test_mvdr_0_ref_channel"'
+            - 'tests_to_skip += " or test_rtf_mvdr"'
+            - 'tests_to_skip += " or test_forced_align"'
+            - 'tests_to_skip += " or test_souden_mvdr"'
+            # Segfault on CI (probably due to limited memory):
+            - 'tests_to_skip += " or test_pitch_shift_shape_2"'
+            - 'tests_to_skip += " or test_paper_configuration"'
+            - 'tests_to_skip += " or test_oscillator_bank"'
+            - 'tests_to_skip += " or test_PitchShift"'
+            - 'tests_to_skip += " or test_pitch_shift_resample_kernel"'
+            - 'tests_to_skip += " or test_quantize_torchscript_1_wav2vec2_large"'
+            - 'tests_to_skip += " or test_finetune_torchscript_1_wav2vec2_large"'
+            - 'tests_to_skip += " or test_pretrain_torchscript_1_wav2vec2_large"'
+            - 'tests_to_skip += " or test_pretrain_torchscript_2_wav2vec2_large"'
+            - 'tests_to_skip += " or test_quantize_torchscript_2_wav2vec2_large_lv60k"'
+            - 'tests_to_skip += " or test_finetune_torchscript_2_wav2vec2_large_lv60k"'
+            - 'tests_to_skip += " or test_pretrain_torchscript_1_wav2vec2_large_lv60k"'
+            - 'tests_to_skip += " or test_pretrain_torchscript_2_wav2vec2_large_lv60k"'
+            # AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)
+            - 'tests_to_skip += " or test_unknown_subtype_warning"'
+            # ValueError: bad delimiter value (in Python 3.13)
+            - 'tests_to_skip += " or test_cmuarctic_path"'
+            - 'tests_to_skip += " or test_cmuarctic_str"'
+            # inaccurate on py!=3.11
+            - 'tests_to_skip += " or test_amplitude_to_DB"'
+            # We don't build with sox, but this test fails with
+            # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
+            - 'tests_to_skip += " or test_torchscript_fails"'
+            - 'sys.exit(pytest.main(["-v", "test/torchaudio_unittest", "-k", f"not ({tests_to_skip})"]))'
 
 about:
   homepage: https://github.com/pytorch/audio

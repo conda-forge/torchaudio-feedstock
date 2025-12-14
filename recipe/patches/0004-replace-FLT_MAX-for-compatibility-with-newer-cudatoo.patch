@@ -1,0 +1,85 @@
+From 8a45177ee88d524ae34db3b1f6c419630be7e095 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 24 Nov 2024 17:57:45 +1100
+Subject: [PATCH 4/5] replace FLT_MAX for compatibility with newer cudatoolkit
+
+---
+ .../cuctc/src/ctc_prefix_decoder_kernel_v2.cu  | 18 +++++++++---------
+ 1 file changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/src/libtorchaudio/cuctc/src/ctc_prefix_decoder_kernel_v2.cu b/src/libtorchaudio/cuctc/src/ctc_prefix_decoder_kernel_v2.cu
+index 9906f262..84c9609b 100644
+--- a/src/libtorchaudio/cuctc/src/ctc_prefix_decoder_kernel_v2.cu
++++ b/src/libtorchaudio/cuctc/src/ctc_prefix_decoder_kernel_v2.cu
+@@ -153,7 +153,7 @@ __global__ void prob_matrix_v2_kernel(
+       } else {
+         out_prob = _logprob(cur_prob, _logsumexp(beamid_p.x, beamid_p.y));
+       }
+-      ptable[idout] = -FLT_MAX;
++      ptable[idout] = -std::numeric_limits<float>::max();
+       ptablen[idout] = out_prob;
+     }
+   }
+@@ -187,7 +187,7 @@ __global__ void prob_space_blank_kernel_v2(
+     int idout = blid + (batch_id * beam + beamid) * ldc;
+     ptable[idout] = _logprob(pc, _logsumexp(tmpprev.x, tmpprev.y));
+     if (last_char == blid)
+-      ptablen[idout] = -FLT_MAX;
++      ptablen[idout] = -std::numeric_limits<float>::max();
+   }
+ 
+   if (spid >= 0 && (spid != blid) && beamid < beam) {
+@@ -196,7 +196,7 @@ __global__ void prob_space_blank_kernel_v2(
+     int idout = spid + (batch_id * beam + beamid) * ldc;
+     ptablen[idout] = _lauguage() *
+         _logprob(pc, _logsumexp(tmpprev.x, tmpprev.y)); // logsumexp
+-    ptable[idout] = -FLT_MAX;
++    ptable[idout] = -std::numeric_limits<float>::max();
+   }
+ }
+ 
+@@ -248,8 +248,8 @@ __global__ void matrix_merge_kernel_v2(
+ 
+       ptable[tidout] = _logsumexp(ptable[tidout], ptable[tidin]);
+       ptablen[tidout] = _logsumexp(ptablen[tidout], ptablen[tidin]);
+-      ptable[tidin] = -FLT_MAX;
+-      ptablen[tidin] = -FLT_MAX;
++      ptable[tidin] = -std::numeric_limits<float>::max();
++      ptablen[tidin] = -std::numeric_limits<float>::max();
+     }
+   }
+ }
+@@ -306,13 +306,13 @@ __global__ __launch_bounds__(BLOCK_SIZE) void first_matrix__bitonic_topk_kernel(
+     int shift = clen[idx + batch_id * ldbeam];
+     if (id != blid) {
+       float2 xy =
+-          is_need_add_blank ? float2{key, -FLT_MAX} : float2{-FLT_MAX, key};
++          is_need_add_blank ? float2{key, -std::numeric_limits<float>::max()} : float2{-std::numeric_limits<float>::max(), key};
+       pprev[batch_id * ldbeam + idx] = xy;
+       clist[batch_id * beam * ldseq_len + idx * ldseq_len + shift] = id;
+       clen[batch_id * ldbeam + idx] += 1;
+       clast[batch_id * ldbeam + idx] = id;
+     } else {
+-      pprev[batch_id * ldbeam + idx] = float2{key, -FLT_MAX};
++      pprev[batch_id * ldbeam + idx] = float2{key, -std::numeric_limits<float>::max()};
+     }
+     score[batch_id * ldbeam + idx] = key;
+   }
+@@ -499,7 +499,7 @@ __launch_bounds__(BLOCK_SIZE) void topk_reduce_and_copy_list_per_batch_kernel(
+       ptable_ptablen.y = ptablen[batch_id * ldc * beam + id];
+       float cur_score = _logsumexp(ptable_ptablen.x, ptable_ptablen.y);
+       score[batch_id * ldbeam + out_beamid] = cur_score;
+-      float2 ptable_ptablen2 = float2{cur_score, -FLT_MAX};
++      float2 ptable_ptablen2 = float2{cur_score, -std::numeric_limits<float>::max()};
+       pprev[batch_id * ldbeam + out_beamid] =
+           is_need_add_blank ? ptable_ptablen2 : ptable_ptablen;
+     }
+@@ -534,7 +534,7 @@ __launch_bounds__(BLOCK_SIZE) void topk_reduce_and_copy_list_per_batch_kernel(
+         ptable_ptablen.y = ptablen[batch_id * ldc * beam + id];
+         float cur_score = _logsumexp(ptable_ptablen.x, ptable_ptablen.y);
+         score[batch_id * ldbeam + idx] = cur_score;
+-        float2 ptable_ptablen2 = float2{cur_score, -FLT_MAX};
++        float2 ptable_ptablen2 = float2{cur_score, -std::numeric_limits<float>::max()};
+         pprev[batch_id * ldbeam + idx] =
+             is_need_add_blank ? ptable_ptablen2 : ptable_ptablen;
+       }

@@ -160,6 +160,13 @@ Current build status
                 </a>
               </td>
             </tr><tr>
+              <td>osx_64_python3.13.____cp313</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/torchaudio-feedstock?branchName=main&jobName=osx&configuration=osx%20osx_64_python3.13.____cp313" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
               <td>osx_arm64_python3.10.____cpython</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=23672&branchName=main">
@@ -201,6 +208,7 @@ Current release info
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-torchaudio-green.svg)](https://anaconda.org/conda-forge/torchaudio) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/torchaudio.svg)](https://anaconda.org/conda-forge/torchaudio) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/torchaudio.svg)](https://anaconda.org/conda-forge/torchaudio) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/torchaudio.svg)](https://anaconda.org/conda-forge/torchaudio) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-torchaudio--tests-green.svg)](https://anaconda.org/conda-forge/torchaudio-tests) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/torchaudio-tests.svg)](https://anaconda.org/conda-forge/torchaudio-tests) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/torchaudio-tests.svg)](https://anaconda.org/conda-forge/torchaudio-tests) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/torchaudio-tests.svg)](https://anaconda.org/conda-forge/torchaudio-tests) |
 
 Installing torchaudio
 =====================
@@ -212,16 +220,16 @@ conda config --add channels conda-forge
 conda config --set channel_priority strict
 ```
 
-Once the `conda-forge` channel has been enabled, `torchaudio` can be installed with `conda`:
+Once the `conda-forge` channel has been enabled, `torchaudio, torchaudio-tests` can be installed with `conda`:
 
 ```
-conda install torchaudio
+conda install torchaudio torchaudio-tests
 ```
 
 or with `mamba`:
 
 ```
-mamba install torchaudio
+mamba install torchaudio torchaudio-tests
 ```
 
 It is possible to list all of the versions of `torchaudio` available on your platform with `conda`:
