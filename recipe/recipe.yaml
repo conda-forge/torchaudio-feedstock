@@ -199,23 +199,6 @@ outputs:
             - 'for var in vars: os.environ[f"TORCHAUDIO_TEST_ALLOW_SKIP_IF_{var}"] = "true"'
             - 'os.environ["CI"] = "true"'
             - 'tests_to_skip = "_not_a_real_test"'
-            # Output 0 of UnbindBackward0 is a view and is being modified inplace.
-            # This view is the output of a function that returns multiple views.
-            # Such functions do not allow the output views to be modified inplace.
-            # You should replace the inplace operation by an out-of-place one.
-            - 'tests_to_skip += " or TestAutogradLfilterCPU"'
-            - 'tests_to_skip += " or test_deemphasis"'
-            # 'torchaudio' object has no attribute 'rnnt_loss'
-            - 'tests_to_skip += " or rnnt"'
-            # 'torchaudio' object has no attribute 'ray_tracing'
-            - 'tests_to_skip += " or ray_tracing"'
-            # object has no attribute _simulate_rir:
-            - 'tests_to_skip += " or test_simulate_rir"'
-            # ValueError: invalid version number '0.10.2.post1'
-            - 'tests_to_skip += " or test_create_mel"'
-            # RuntimeError: torchaudio.functional._alignment.forced_align Requires alignment extension, but TorchAudio is not compiled with it.
-            # Please build TorchAudio with alignment support.
-            - 'tests_to_skip += " or test_forced_align"'
             # Very slow on CI:
             - 'tests_to_skip += " or hubert_large"'
             - 'tests_to_skip += " or hubert_xlarge"'
@@ -227,30 +210,8 @@ outputs:
             - 'tests_to_skip += " or test_rtf_mvdr"'
             - 'tests_to_skip += " or test_forced_align"'
             - 'tests_to_skip += " or test_souden_mvdr"'
-            # Segfault on CI (probably due to limited memory):
-            - 'tests_to_skip += " or test_pitch_shift_shape_2"'
-            - 'tests_to_skip += " or test_paper_configuration"'
-            - 'tests_to_skip += " or test_oscillator_bank"'
-            - 'tests_to_skip += " or test_PitchShift"'
-            - 'tests_to_skip += " or test_pitch_shift_resample_kernel"'
-            - 'tests_to_skip += " or test_quantize_torchscript_1_wav2vec2_large"'
-            - 'tests_to_skip += " or test_finetune_torchscript_1_wav2vec2_large"'
-            - 'tests_to_skip += " or test_pretrain_torchscript_1_wav2vec2_large"'
-            - 'tests_to_skip += " or test_pretrain_torchscript_2_wav2vec2_large"'
-            - 'tests_to_skip += " or test_quantize_torchscript_2_wav2vec2_large_lv60k"'
-            - 'tests_to_skip += " or test_finetune_torchscript_2_wav2vec2_large_lv60k"'
-            - 'tests_to_skip += " or test_pretrain_torchscript_1_wav2vec2_large_lv60k"'
-            - 'tests_to_skip += " or test_pretrain_torchscript_2_wav2vec2_large_lv60k"'
-            # AssertionError: assert 2 == 1 (caused by `FutureWarning: functools.partial` in Python 3.13)
-            - 'tests_to_skip += " or test_unknown_subtype_warning"'
-            # ValueError: bad delimiter value (in Python 3.13)
-            - 'tests_to_skip += " or test_cmuarctic_path"'
-            - 'tests_to_skip += " or test_cmuarctic_str"'
             # inaccurate on py!=3.11
             - 'tests_to_skip += " or test_amplitude_to_DB"'
-            # We don't build with sox, but this test fails with
-            # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
-            - 'tests_to_skip += " or test_torchscript_fails"'
             - 'sys.exit(pytest.main(["-v", "test/torchaudio_unittest", "-k", f"not ({tests_to_skip})"]))'
 
 about:
