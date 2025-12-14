@@ -247,6 +247,8 @@ outputs:
             # ValueError: bad delimiter value (in Python 3.13)
             - 'tests_to_skip += " or test_cmuarctic_path"'
             - 'tests_to_skip += " or test_cmuarctic_str"'
+            # inaccurate on py!=3.11
+            - 'tests_to_skip += " or test_amplitude_to_DB"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'
