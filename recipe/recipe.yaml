@@ -157,6 +157,7 @@ outputs:
       name: torchaudio-tests
     build:
       skip:
+        - win
         - cuda_compiler_version != "None"
       script: ${{ 'true' if unix else 'exit /b 0' }}
     requirements:
