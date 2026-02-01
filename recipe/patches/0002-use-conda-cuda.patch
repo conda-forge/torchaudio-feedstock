@@ -1,4 +1,4 @@
-From 1c0b82dcb1e4843e197ded6b5ee3f222e259f81a Mon Sep 17 00:00:00 2001
+From 4cb0a663e975def9501f36df17af8332f0bc34e0 Mon Sep 17 00:00:00 2001
 From: Tobias Fischer <info@tobiasfischer.info>
 Date: Thu, 10 Oct 2024 07:48:28 +1000
 Subject: [PATCH 2/5] use conda cuda
@@ -8,10 +8,10 @@ Subject: [PATCH 2/5] use conda cuda
  1 file changed, 4 deletions(-)
 
 diff --git a/tools/setup_helpers/extension.py b/tools/setup_helpers/extension.py
-index 7aa5a463..8825d7d8 100644
+index 2d5484d1..de5e529f 100644
 --- a/tools/setup_helpers/extension.py
 +++ b/tools/setup_helpers/extension.py
-@@ -120,10 +120,6 @@ class CMakeBuild(build_ext):
+@@ -118,10 +118,6 @@ class CMakeBuild(build_ext):
              _arches = [arch[:-4] if arch.endswith("+PTX") else f"{arch}-real" for arch in _arches]
              cmake_args += [f"-DCMAKE_CUDA_ARCHITECTURES={';'.join(_arches)}"]
  

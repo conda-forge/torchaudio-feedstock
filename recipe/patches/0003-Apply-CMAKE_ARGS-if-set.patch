@@ -1,4 +1,4 @@
-From 102f4629638acea12165ddbac972fbc208f85e6e Mon Sep 17 00:00:00 2001
+From e3c9ccec9d33c26229bba7fc2ac7a22fd9a45cd4 Mon Sep 17 00:00:00 2001
 From: Tobias Fischer <info@tobiasfischer.info>
 Date: Thu, 10 Oct 2024 09:38:57 +1000
 Subject: [PATCH 3/5] Apply CMAKE_ARGS if set
@@ -8,7 +8,7 @@ Subject: [PATCH 3/5] Apply CMAKE_ARGS if set
  1 file changed, 4 insertions(+)
 
 diff --git a/tools/setup_helpers/extension.py b/tools/setup_helpers/extension.py
-index 8825d7d8..dea97335 100644
+index de5e529f..4e813ee7 100644
 --- a/tools/setup_helpers/extension.py
 +++ b/tools/setup_helpers/extension.py
 @@ -3,6 +3,7 @@ import os
@@ -19,7 +19,7 @@ index 8825d7d8..dea97335 100644
  
  import torch
  from setuptools import Extension
-@@ -111,6 +112,9 @@ class CMakeBuild(build_ext):
+@@ -109,6 +110,9 @@ class CMakeBuild(build_ext):
              f"-DUSE_CUDA:BOOL={'ON' if _USE_CUDA else 'OFF'}",
              f"-DUSE_OPENMP:BOOL={'ON' if _USE_OPENMP else 'OFF'}",
          ]
