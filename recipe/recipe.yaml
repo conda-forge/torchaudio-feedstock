@@ -254,6 +254,7 @@ outputs:
               then:
                 # somehow OOMs only on py3.14; possibly related to different default for multiprocessing
                 - 'tests_to_skip += " or (TestWav2Vec2Model and test_quantize)"'
+                - 'tests_to_skip += " or TestWavLMModel"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'
