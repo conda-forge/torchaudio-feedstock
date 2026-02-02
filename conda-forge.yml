@@ -1,9 +1,9 @@
 azure:
   free_disk_space: true
   settings_linux:
-    # this is somewhat fine-tuned; with a 10GB swapfile, the aarch+CUDA builds run out
-    # of disk space, while 7GB is not enough to pass the test suite (esp. on py3.14)
-    swapfile_size: 8GiB
+    # with a 8GB swapfile (at the cost of disk space), the aarch+CUDA builds run out of storage, while
+    # 7GB is not enough to pass the test suite on py3.14; IOW there's no window that works for both
+    swapfile_size: 5GiB
 build_platform:
   linux_aarch64: linux_64
   osx_arm64: osx_64

@@ -250,6 +250,10 @@ outputs:
             - 'tests_to_skip += " or test_cmuarctic_str"'
             # inaccurate on py!=3.11
             - 'tests_to_skip += " or test_amplitude_to_DB"'
+            - if: match(python, "==3.14")
+              then:
+                # somehow OOMs only on py3.14; possibly related to different default for multiprocessing
+                - 'tests_to_skip += " or (TestWav2Vec2Model and test_quantize)"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'
