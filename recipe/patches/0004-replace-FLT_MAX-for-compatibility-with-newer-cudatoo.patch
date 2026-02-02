@@ -1,4 +1,4 @@
-From 8a45177ee88d524ae34db3b1f6c419630be7e095 Mon Sep 17 00:00:00 2001
+From 029b71ece34aa9b0279c196f8840aaf913c2b519 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 24 Nov 2024 17:57:45 +1100
 Subject: [PATCH 4/5] replace FLT_MAX for compatibility with newer cudatoolkit

@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 
 context:
-  version: "2.9.1"
-  build_number: 1
+  version: "2.10.0"
+  build_number: 0
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
@@ -12,7 +12,7 @@ recipe:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 590492c90552959b3df6f601eb733135064bf2d9e53c516adcf6845a4e545662
+    sha256: d0d0d9575025eb85150356a0b0de75b553484838006af17a62470b52d59845d1
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
@@ -250,6 +250,11 @@ outputs:
             - 'tests_to_skip += " or test_cmuarctic_str"'
             # inaccurate on py!=3.11
             - 'tests_to_skip += " or test_amplitude_to_DB"'
+            - if: match(python, "==3.14")
+              then:
+                # somehow OOMs only on py3.14; possibly related to different default for multiprocessing
+                - 'tests_to_skip += " or (TestWav2Vec2Model and test_quantize)"'
+                - 'tests_to_skip += " or TestWavLMModel"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'

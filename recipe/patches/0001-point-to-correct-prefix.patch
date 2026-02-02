@@ -1,4 +1,4 @@
-From a8e5d8a9ba55aafbceb0002364e08e07470b6259 Mon Sep 17 00:00:00 2001
+From e805e6d7de24ba252d9fb73cfb3d0cdd8796d3d3 Mon Sep 17 00:00:00 2001
 From: Hadrien Mary <hadrien.mary@gmail.com>
 Date: Fri, 27 Sep 2024 23:15:12 -0400
 Subject: [PATCH 1/5] point to correct prefix
@@ -8,10 +8,10 @@ Subject: [PATCH 1/5] point to correct prefix
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/tools/setup_helpers/extension.py b/tools/setup_helpers/extension.py
-index 635b4ae4..7aa5a463 100644
+index 8d442486..2d5484d1 100644
 --- a/tools/setup_helpers/extension.py
 +++ b/tools/setup_helpers/extension.py
-@@ -95,8 +95,9 @@ class CMakeBuild(build_ext):
+@@ -94,8 +94,9 @@ class CMakeBuild(build_ext):
  
          cmake_args = [
              f"-DCMAKE_BUILD_TYPE={cfg}",
