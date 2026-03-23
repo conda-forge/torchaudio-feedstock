@@ -14,12 +14,7 @@ source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
     sha256: 599ec24e7e1eef476ef21f0178e33da00e2434f930ba42e9cc20bf4002220486
     patches:
-      - patches/0001-point-to-correct-prefix.patch
-      - patches/0002-use-conda-cuda.patch
-      - patches/0003-Apply-CMAKE_ARGS-if-set.patch
       - patches/0004-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
-      # backport https://github.com/pytorch/audio/pull/4069
-      - patches/0005-Fix-torchscript-related-test-failures.-4069.patch
 
 build:
   number: ${{ build_number }}
