@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 
 context:
-  version: "2.10.0"
+  version: "2.11.0"
   build_number: 0
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
@@ -12,7 +12,7 @@ recipe:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: d0d0d9575025eb85150356a0b0de75b553484838006af17a62470b52d59845d1
+    sha256: 599ec24e7e1eef476ef21f0178e33da00e2434f930ba42e9cc20bf4002220486
     patches:
       - patches/0001-point-to-correct-prefix.patch
       - patches/0002-use-conda-cuda.patch
