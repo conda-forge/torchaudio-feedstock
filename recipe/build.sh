@@ -4,6 +4,8 @@ set -ex
 if [[ ${cuda_compiler_version} != "None" ]]; then
   export CUDA_TOOLKIT_ROOT_DIR="${PREFIX}"
   export CUDA_HOME="${PREFIX}"
+  # necessary to find cicc on CUDA >=12.0
+  export PATH="${PATH}:${BUILD_PREFIX}/nvvm/bin"
   if [[ ${cuda_compiler_version} == 12.9 ]]; then
     export TORCH_CUDA_ARCH_LIST="5.0;6.0;7.0;7.5;8.0;8.6;8.9;9.0;10.0;12.0+PTX"
   elif [[ ${cuda_compiler_version} == 13.0 ]]; then
