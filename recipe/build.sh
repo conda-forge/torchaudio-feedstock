@@ -34,6 +34,7 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
   esac
 
   # cicc is expected in the wrong directory for some reason
+  mkdir -p ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin
   ln -s ${BUILD_PREFIX}/nvvm/bin/cicc ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin/cicc
 
   export USE_CUDA=1
