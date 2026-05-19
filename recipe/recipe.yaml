@@ -107,6 +107,7 @@ outputs:
             - libcurand-dev
             - libcusolver-dev
             - libcusparse-dev
+            - cuda-nvcc
       run:
         - python
         - numpy
