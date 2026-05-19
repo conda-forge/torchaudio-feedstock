@@ -17,25 +17,25 @@ if [[ ${cuda_compiler_version} != "None" ]]; then
     export CUDA_TOOLKIT_ROOT=${PREFIX}
   fi
 
-  case ${target_platform} in
-    linux-64)
-        CUDA_TARGET=x86_64-linux
-        ;;
-    linux-aarch64)
-        if [[ "${arm_variant_type}" == "tegra" ]]; then
-            CUDA_TARGET=aarch64-linux
-        else
-            CUDA_TARGET=sbsa-linux
-        fi
-        ;;
-    *)
-        echo "unknown CUDA arch, edit build.sh"
-        exit 1
-  esac
+  # case ${target_platform} in
+  #   linux-64)
+  #       CUDA_TARGET=x86_64-linux
+  #       ;;
+  #   linux-aarch64)
+  #       if [[ "${arm_variant_type}" == "tegra" ]]; then
+  #           CUDA_TARGET=aarch64-linux
+  #       else
+  #           CUDA_TARGET=sbsa-linux
+  #       fi
+  #       ;;
+  #   *)
+  #       echo "unknown CUDA arch, edit build.sh"
+  #       exit 1
+  # esac
 
-  # cicc is expected in the wrong directory for some reason
-  mkdir -p ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin
-  cp ${BUILD_PREFIX}/nvvm/bin/cicc ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin/cicc
+  # # cicc is expected in the wrong directory for some reason
+  # mkdir -p ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin
+  # cp ${BUILD_PREFIX}/nvvm/bin/cicc ${PREFIX}/bin/../targets/${CUDA_TARGET}/nvvm/bin/cicc
 
   export USE_CUDA=1
   export BUILD_CUDA_CTC_DECODER=1
