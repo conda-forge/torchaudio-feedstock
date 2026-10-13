@@ -78,7 +78,7 @@ outputs:
         - pip
         - setuptools
         - pytorch
-        - ${{ "pytorch * cuda*" if cuda_compiler_version != "None" }}
+        - ${{ "pytorch * " ~ cuda_build_string ~ "*" if cuda_compiler_version != "None" }}
         - ${{ "pytorch * cpu*" if cuda_compiler_version == "None" }}
         - bzip2
         - kaldi
