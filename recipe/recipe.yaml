@@ -15,6 +15,8 @@ source:
     sha256: 594db84c91cb795a13853d1ee457d0f874dd95838b6f029eaaf518fb3838cdf5
     patches:
       - patches/0004-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
+      # tests only; small numerical differences on arm64
+      - patches/0005-relax-test-tolerances-for-arm64.patch
 
 build:
   number: ${{ build_number }}
@@ -253,18 +255,12 @@ outputs:
                 # somehow OOMs only on py3.14; possibly related to different default for multiprocessing
                 - 'tests_to_skip += " or (TestWav2Vec2Model and test_quantize)"'
                 - 'tests_to_skip += " or TestWavLMModel"'
-            - if: aarch64 or arm64
-              then:
-                # slightly exceeds tolerance (5.6e-5 vs. 5e-5)
-                - 'tests_to_skip += " or test_griffinlim_0_99"'
             - if: aarch64
               then:
                 # RuntimeError: illegal immediate parameter (range error)
                 - 'tests_to_skip += " or test_lfilter_shape_4 or test_lfilter_shape_6"'
                 # RuntimeError: unknown architecure (no quantization engine)
                 - 'tests_to_skip += " or test_quantize"'
-                # slightly exceed tolerance
-                - 'tests_to_skip += " or test_batch_inverse_spectrogram or test_batch_pitch_shift or test_batch_spectrogram"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'

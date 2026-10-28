@@ -1,0 +1,56 @@
+From 6c9599d77beb5a861b6aea72d20e89c322d7cc51 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <tobias.fischer@qut.edu.au>
+Date: Thu, 29 Oct 2026 08:39:15 +1000
+Subject: [PATCH] Relax test tolerances for arm64
+
+Small floating-point differences on arm64 exceed the very tight
+tolerances of these tests.
+---
+ .../functional/librosa_compatibility_test_impl.py           | 2 +-
+ .../transforms/batch_consistency_test.py                    | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/test/torchaudio_unittest/functional/librosa_compatibility_test_impl.py b/test/torchaudio_unittest/functional/librosa_compatibility_test_impl.py
+index 7e3bedf..95e524f 100644
+--- a/test/torchaudio_unittest/functional/librosa_compatibility_test_impl.py
++++ b/test/torchaudio_unittest/functional/librosa_compatibility_test_impl.py
+@@ -51,7 +51,7 @@ class Functional(TestBaseMixin, RequestMixin):
+             length=waveform.size(1),
+             pad_mode="reflect",
+         )[None, ...]
+-        self.assertEqual(result, torch.from_numpy(expected), atol=5e-5, rtol=1e-07)
++        self.assertEqual(result, torch.from_numpy(expected), atol=1e-4, rtol=1e-07)
+ 
+     @nested_params(
+         [
+diff --git a/test/torchaudio_unittest/transforms/batch_consistency_test.py b/test/torchaudio_unittest/transforms/batch_consistency_test.py
+index 843bd2e..653a713 100644
+--- a/test/torchaudio_unittest/transforms/batch_consistency_test.py
++++ b/test/torchaudio_unittest/transforms/batch_consistency_test.py
+@@ -89,7 +89,7 @@ class TestTransforms(common_utils.TorchaudioTestCase):
+         waveform = waveform.reshape(3, 2, -1)
+         transform = T.Spectrogram()
+ 
+-        self.assert_batch_consistency(transform, waveform)
++        self.assert_batch_consistency(transform, waveform, atol=1e-6)
+ 
+     def test_batch_inverse_spectrogram(self):
+         waveform = common_utils.get_whitenoise(sample_rate=8000, duration=1, n_channels=6)
+@@ -97,7 +97,7 @@ class TestTransforms(common_utils.TorchaudioTestCase):
+         specgram = specgram.reshape(3, 2, specgram.shape[-2], specgram.shape[-1])
+         transform = T.InverseSpectrogram(n_fft=400)
+ 
+-        self.assert_batch_consistency(transform, specgram)
++        self.assert_batch_consistency(transform, specgram, atol=1e-6)
+ 
+     def test_batch_melspectrogram(self):
+         waveform = common_utils.get_whitenoise(sample_rate=8000, duration=1, n_channels=6)
+@@ -162,7 +162,7 @@ class TestTransforms(common_utils.TorchaudioTestCase):
+         waveform = waveform.reshape(3, 2, -1)
+         transform = T.PitchShift(sample_rate, n_steps, n_fft=400)
+ 
+-        self.assert_batch_consistency(transform, waveform)
++        self.assert_batch_consistency(transform, waveform, atol=1e-5)
+ 
+     def test_batch_PSD(self):
+         waveform = common_utils.get_whitenoise(sample_rate=8000, duration=1, n_channels=6)
