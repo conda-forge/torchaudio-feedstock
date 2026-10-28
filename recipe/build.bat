@@ -13,7 +13,7 @@ if "%cuda_compiler_version%" == "None" (
   ) else if "%cuda_compiler_version:~0,2%"=="13" (
     set "TORCH_CUDA_ARCH_LIST=%CF_TORCH_CUDA_ARCH_LIST%"
      REM c.f. https://github.com/pytorch/pytorch/pull/161316
-    set "TORCH_NVCC_FLAGS=!TORCH_NVCC_FLAGS! -compress-mode=size"
+    set "NVCC_APPEND_FLAGS=!NVCC_APPEND_FLAGS! -compress-mode=size"
     REM CCCL in CUDA 13 requires the standard conforming MSVC preprocessor
     set "NVCC_APPEND_FLAGS=!NVCC_APPEND_FLAGS! -Xcompiler /Zc:preprocessor"
   ) else (
