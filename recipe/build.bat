@@ -14,6 +14,8 @@ if "%cuda_compiler_version%" == "None" (
     set "TORCH_CUDA_ARCH_LIST=%CF_TORCH_CUDA_ARCH_LIST%"
      REM c.f. https://github.com/pytorch/pytorch/pull/161316
     set "TORCH_NVCC_FLAGS=!TORCH_NVCC_FLAGS! -compress-mode=size"
+    REM CCCL in CUDA 13 requires the standard conforming MSVC preprocessor
+    set "NVCC_APPEND_FLAGS=!NVCC_APPEND_FLAGS! -Xcompiler /Zc:preprocessor"
   ) else (
      echo "unsupported cuda version. edit build_pytorch.bat"
      exit /b 1
