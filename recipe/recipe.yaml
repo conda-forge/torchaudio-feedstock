@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/prefix-dev/recipe-format/main/schema.json
 
 context:
-  version: "2.11.0"
-  build_number: 5
+  version: "2.11.1"
+  build_number: 0
   cuda_build_string: cuda${{ cuda_compiler_version | version_to_buildstring }}_
   string_prefix: ${{ "cpu_" if cuda_compiler_version == "None" else cuda_build_string }}
 
@@ -12,9 +12,11 @@ recipe:
 
 source:
   - url: https://github.com/pytorch/audio/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 599ec24e7e1eef476ef21f0178e33da00e2434f930ba42e9cc20bf4002220486
+    sha256: 594db84c91cb795a13853d1ee457d0f874dd95838b6f029eaaf518fb3838cdf5
     patches:
       - patches/0004-replace-FLT_MAX-for-compatibility-with-newer-cudatoo.patch
+      # tests only; small numerical differences on arm64
+      - patches/0005-relax-test-tolerances-for-arm64.patch
 
 build:
   number: ${{ build_number }}
@@ -253,6 +255,14 @@ outputs:
                 # somehow OOMs only on py3.14; possibly related to different default for multiprocessing
                 - 'tests_to_skip += " or (TestWav2Vec2Model and test_quantize)"'
                 - 'tests_to_skip += " or TestWavLMModel"'
+            - if: aarch64
+              then:
+                # RuntimeError: illegal immediate parameter (range error)
+                # https://github.com/conda-forge/pytorch-cpu-feedstock/issues/554
+                - 'tests_to_skip += " or test_lfilter_shape_4 or test_lfilter_shape_6"'
+                # RuntimeError: unknown architecure (default quantized engine fails with pytorch 2.13)
+                # https://github.com/conda-forge/pytorch-cpu-feedstock/issues/553
+                - 'tests_to_skip += " or test_quantize"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
             - 'tests_to_skip += " or test_torchscript_fails"'
