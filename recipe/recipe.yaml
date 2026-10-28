@@ -258,8 +258,10 @@ outputs:
             - if: aarch64
               then:
                 # RuntimeError: illegal immediate parameter (range error)
+                # https://github.com/conda-forge/pytorch-cpu-feedstock/issues/554
                 - 'tests_to_skip += " or test_lfilter_shape_4 or test_lfilter_shape_6"'
-                # RuntimeError: unknown architecure (no quantization engine)
+                # RuntimeError: unknown architecure (default quantized engine fails with pytorch 2.13)
+                # https://github.com/conda-forge/pytorch-cpu-feedstock/issues/553
                 - 'tests_to_skip += " or test_quantize"'
             # We don't build with sox, but this test fails with
             # RuntimeError: TorchAudio is not built with sox extension. Please build TorchAudio with libsox support.
