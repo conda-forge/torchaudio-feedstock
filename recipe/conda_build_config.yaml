@@ -1,5 +1,4 @@
-# need to stay on CUDA 12.8 on windows due to https://github.com/pytorch/pytorch/issues/156181
+# CUDA 12.8 and 12.9 have been dropped for pytorch
 cuda_compiler_version:  # [win]
   - None                # [win]
-  - 12.8                # [win]
   - 13.4                # [win]
